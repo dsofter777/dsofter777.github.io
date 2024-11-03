@@ -98,7 +98,8 @@
     <button id="menuToggle">☰</button> <!-- Кнопка для открытия/закрытия меню -->
     <div id="controls">
         <input type="number" id="pieceCount" placeholder="Количество фишек" min="1">
-        <button id="addPiecesButton" class="name-button">+ Add</button>
+        <button id="addPiecesButton" class="name-button">+ Add Playa</button>
+        <button id="addEnemiesButton" class="name-button">+ Add Enemy</button>
         <div id="nameInputs"></div>
         <div id="backgroundButtons"></div>
     </div>
@@ -114,7 +115,6 @@
         let pieces = [];
         let isRightMouseDown = false;
         let lastTrailAction = [];
-        
 
         const backgrounds = [
             'байкерка.png',
@@ -165,18 +165,26 @@
                 addPieces(count);
             }
         });
+        document.getElementById('addEnemiesButton').addEventListener('click', () => {
+            const count = parseInt(document.getElementById('pieceCount').value);
+            if (count > 0) {
+                addEnemies(count);
+            }
+        });
 
         function addPieces(count) {
             const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080'];
-            const baseX = canvas.width / 2;
-            const baseY = canvas.height / 2;
-            const spacing = 30;
+            const baseX = 100; // Fixed X position for players (left side)
+            const baseY = canvas.height / 2; // Center vertically
+            const spacing = 50; // Increased spacing between players
+            const maxPerRow = 10; // Maximum pieces in one row
 
             for (let i = 0; i < count; i++) {
                 const color = colors[i % colors.length];
-                const angle = (i / count) * 2 * Math.PI;
-                const offsetX = Math.cos(angle) * spacing * (i % 5);
-                const offsetY = Math.sin(angle) * spacing * (i % 5);
+                const row = Math.floor(i / maxPerRow); // Determine the current row
+                const column = i % maxPerRow; // Determine the column within the row
+                const offsetY = row * spacing; // Vertical spacing for each row
+                const offsetX = column * spacing; // Horizontal spacing for each column
 
                 const pieceIndex = pieces.length;
                 pieces.push({ x: baseX + offsetX, y: baseY + offsetY, color, isDragging: false, name: '', trails: [], skin: null });
@@ -216,6 +224,38 @@
             }
             draw();
         }
+
+        function addEnemies(count) {
+            const enemyColor = '#FF0000'; // Цвет врагов
+            const baseX = canvas.width - 100; // Fixed X position for enemies (right side)
+            const baseY = canvas.height / 2; // Center vertically
+            const spacing = 50; // Increased spacing between enemies
+            const maxPerRow = 10; // Maximum enemies in one row
+
+            for (let i = 0; i < count; i++) {
+                const row = Math.floor(i / maxPerRow); // Determine the current row
+                const column = i % maxPerRow; // Determine the column within the row
+                const offsetY = row * spacing; // Vertical spacing for each row
+                const offsetX = column * spacing; // Horizontal spacing for each column
+
+                const pieceIndex = pieces.length;
+                pieces.push({ x: baseX - offsetX, y: baseY + offsetY, color: enemyColor, isDragging: false, name: 'Враг', trails: [], skin: null });
+
+                const buttonContainer = document.createElement('div');
+
+                const button = document.createElement('button');
+                button.className = 'name-button';
+                button.innerText = `Враг ${pieceIndex + 1}`;
+                button.style.backgroundColor = enemyColor; // Устанавливаем цвет кнопки
+                button.style.color = '#FFFFFF'; // Цвет текста кнопки
+                buttonContainer.appendChild(button);
+
+                // Добавляем контейнер с кнопками в UI
+                document.getElementById('nameInputs').appendChild(buttonContainer);
+            }
+            draw();
+        }
+
 
         function showSkinMenu(pieceIndex, button) {
             const skinMenu = document.getElementById('skinMenu');
@@ -261,24 +301,30 @@
         });
 
         canvas.addEventListener('mousedown', (event) => {
-            if (event.button === 0) {
-                pieces.forEach(piece => {
-                    if (isMouseOverPiece(event.offsetX, event.offsetY, piece)) {
-                        piece.isDragging = true;
+            if (event.button === 0) { // Left mouse button
+                // Find the topmost piece under the mouse cursor
+                let foundPiece = null;
+                for (let i = pieces.length - 1; i >= 0; i--) { // Check from topmost to bottom
+                    if (isMouseOverPiece(event.offsetX, event.offsetY, pieces[i])) {
+                        foundPiece = pieces[i];
+                        break; // Stop at the first piece found
                     }
-                });
+                }
+                if (foundPiece) {
+                    foundPiece.isDragging = true; // Only set dragging for the found piece
+                }
             } else if (event.button === 2) {
-                isRightMouseDown = true;
+                isRightMouseDown = true; // Right mouse button logic (if needed)
             }
         });
 
         canvas.addEventListener('mouseup', (event) => {
             if (event.button === 0) {
                 pieces.forEach(piece => {
-                    piece.isDragging = false;
+                    piece.isDragging = false; // Stop dragging for all pieces on mouse up
                 });
             } else if (event.button === 2) {
-                isRightMouseDown = false;
+                isRightMouseDown = false; // Right mouse button release
             }
         });
 
@@ -292,9 +338,9 @@
                     piece.y = event.offsetY;
 
                     if (isRightMouseDown) {
-                        // Определяем количество промежуточных точек для плавного следа
+                        // Create trails logic
                         const distance = Math.hypot(piece.x - prevX, piece.y - prevY);
-                        const steps = Math.ceil(distance / 5); // Чем больше шагов, тем плавнее линия
+                        const steps = Math.ceil(distance / 5); // Adjust trail smoothness
 
                         for (let i = 1; i <= steps; i++) {
                             const interpolatedX = prevX + (piece.x - prevX) * (i / steps);
@@ -305,7 +351,7 @@
                     }
                 }
             });
-            draw();
+            draw(); // Redraw the canvas after moving
         });
 
         function isMouseOverPiece(mouseX, mouseY, piece) {
@@ -315,8 +361,22 @@
         }
 
         function draw() {
+            // Рисуем фон
             ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
 
+            // Сначала рисуем следы
+            pieces.forEach(piece => {
+                // Рисуем следы
+                piece.trails.forEach(trail => {
+                    ctx.beginPath();
+                    ctx.arc(trail.x, trail.y, 5, 0, Math.PI * 2);
+                    ctx.fillStyle = trail.color;
+                    ctx.fill();
+                    ctx.closePath();
+                });
+            });
+
+            // Затем рисуем фишки
             pieces.forEach(piece => {
                 // Рисуем фишку
                 if (piece.skin) {
@@ -324,8 +384,8 @@
                     skinImage.src = piece.skin;
 
                     const aspectRatio = 16 / 9; // 16:9 aspect ratio
-                    const height = 80; // You can set your desired height
-                    const width = height * aspectRatio; // Calculate width based on height and aspect ratio
+                    const height = 80; // Установите желаемую высоту
+                    const width = height * aspectRatio; // Рассчитываем ширину на основе высоты и соотношения сторон
 
                     ctx.drawImage(skinImage, piece.x - width / 2, piece.y - height / 2, width, height);
                 } else {
@@ -340,7 +400,7 @@
                 ctx.font = 'bold 26px "Trebuchet MS", Arial, sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                
+
                 // Добавляем тень
                 ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
                 ctx.shadowOffsetX = 2;
@@ -353,15 +413,6 @@
 
                 // Отключаем тень после использования
                 ctx.shadowColor = 'transparent';
-
-                // Рисуем следы
-                piece.trails.forEach(trail => {
-                    ctx.beginPath();
-                    ctx.arc(trail.x, trail.y, 5, 0, Math.PI * 2);
-                    ctx.fillStyle = trail.color;
-                    ctx.fill();
-                    ctx.closePath();
-                });
             });
         }
 
