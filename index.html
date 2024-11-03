@@ -46,8 +46,14 @@
             padding: 10px;
             font-weight: bold;
         }
-        #menuToggle:hover {
-            background-color: #0056b3;
+        #skinMenu {
+            display: none; /* Скрываем меню скинов по умолчанию */
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 1px solid #007BFF;
+            border-radius: 5px;
+            padding: 10px;
+            z-index: 3;
         }
         input[type="number"] {
             width: calc(100% - 10px);
@@ -57,7 +63,7 @@
             border-radius: 5px;
             font-size: 16px;
         }
-        .name-button, .background-button {
+        .name-button, .background-button, .skin-button {
             margin: 5px 0;
             width: 100%;
             padding: 10px;
@@ -70,7 +76,7 @@
             font-weight: bold;
             transition: background-color 0.3s;
         }
-        .name-button:hover, .background-button:hover {
+        .name-button:hover, .background-button:hover, .skin-button:hover {
             background-color: #0056b3;
         }
         #addPiecesButton {
@@ -79,6 +85,12 @@
         }
         #addPiecesButton:hover {
             background-color: #218838; /* Темный зеленый при наведении */
+        }
+        .skin-image {
+            width: 80px; /* Увеличиваем размер картинки скина */
+            height: 80px; /* Увеличиваем размер картинки скина */
+            cursor: pointer; /* Указатель на картинку */
+            margin: 5px; /* Отступы между картинками */
         }
     </style>
 </head>
@@ -91,6 +103,7 @@
         <div id="backgroundButtons"></div>
     </div>
     <canvas id="gameCanvas"></canvas>
+    <div id="skinMenu"></div> <!-- Меню для выбора скинов -->
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -101,6 +114,7 @@
         let pieces = [];
         let isRightMouseDown = false;
         let lastTrailAction = [];
+        
 
         const backgrounds = [
             'байкерка.png',
@@ -132,6 +146,19 @@
         const backgroundImage = new Image();
         backgroundImage.src = backgrounds[currentBackgroundIndex];
 
+        // Массив с скинами (предполагается, что изображения находятся в одной папке)
+        const skins = [
+            'skin1.png',
+            'skin2.png',
+            'skin3.png',
+            'skin4.png',
+            'skin5.png',
+            'skin6.png',
+            'skin7.png',
+            'skin8.png',
+            'skin9.png',
+        ];
+
         document.getElementById('addPiecesButton').addEventListener('click', () => {
             const count = parseInt(document.getElementById('pieceCount').value);
             if (count > 0) {
@@ -152,19 +179,28 @@
                 const offsetY = Math.sin(angle) * spacing * (i % 5);
 
                 const pieceIndex = pieces.length;
-                pieces.push({ x: baseX + offsetX, y: baseY + offsetY, color, isDragging: false, name: '', trails: [] });
+                pieces.push({ x: baseX + offsetX, y: baseY + offsetY, color, isDragging: false, name: '', trails: [], skin: null });
+
+                const buttonContainer = document.createElement('div');
 
                 const button = document.createElement('button');
                 button.className = 'name-button';
                 button.innerText = `Игрок ${pieceIndex + 1}`;
                 button.style.backgroundColor = color; // Устанавливаем цвет кнопки
+                button.style.color = '#FFFFFF'; // Цвет текста кнопки
+                buttonContainer.appendChild(button);
 
-                // Определяем цвет текста для читаемости
-                const textColor = '#FFFFFF';
-                button.style.color = textColor; // Цвет текста кнопки
+                // Кнопка выбора скина
+                const skinButton = document.createElement('button');
+                skinButton.className = 'skin-button';
+                skinButton.innerText = 'Скин';
+                skinButton.style.backgroundColor = color; // Устанавливаем цвет кнопки скина
+                buttonContainer.appendChild(skinButton);
 
-                document.getElementById('nameInputs').appendChild(button);
+                // Добавляем контейнер с кнопками в UI
+                document.getElementById('nameInputs').appendChild(buttonContainer);
 
+                // Обработчик на кнопку имени
                 button.addEventListener('click', () => {
                     const newName = prompt('Введите новое название фишки:', pieces[pieceIndex].name);
                     if (newName !== null) {
@@ -172,8 +208,36 @@
                         button.innerText = newName || `Игрок ${pieceIndex + 1}`;
                     }
                 });
+
+                // Обработчик на кнопку выбора скина
+                skinButton.addEventListener('click', () => {
+                    showSkinMenu(pieceIndex, skinButton);
+                });
             }
             draw();
+        }
+
+        function showSkinMenu(pieceIndex, button) {
+            const skinMenu = document.getElementById('skinMenu');
+            skinMenu.style.display = 'block';
+            skinMenu.style.top = button.offsetTop + button.offsetHeight + 'px'; // Позиционируем меню под кнопкой
+            skinMenu.style.left = button.offsetLeft + 'px'; // Позиционируем меню под кнопкой
+
+            // Очищаем меню перед добавлением новых скинов
+            skinMenu.innerHTML = '';
+
+            // Добавляем изображения скинов в меню
+            skins.forEach((skin, index) => {
+                const img = document.createElement('img');
+                img.src = skin;
+                img.className = 'skin-image';
+                img.addEventListener('click', () => {
+                    pieces[pieceIndex].skin = skin; // Применяем выбранный скин
+                    skinMenu.style.display = 'none'; // Скрываем меню
+                    draw(); // Перерисовываем канвас
+                });
+                skinMenu.appendChild(img);
+            });
         }
 
         function createBackgroundButtons() {
@@ -255,11 +319,22 @@
 
             pieces.forEach(piece => {
                 // Рисуем фишку
-                ctx.beginPath();
-                ctx.arc(piece.x, piece.y, 20, 0, Math.PI * 2);
-                ctx.fillStyle = piece.color;
-                ctx.fill();
-                ctx.closePath();
+                if (piece.skin) {
+                    const skinImage = new Image();
+                    skinImage.src = piece.skin;
+
+                    const aspectRatio = 16 / 9; // 16:9 aspect ratio
+                    const height = 80; // You can set your desired height
+                    const width = height * aspectRatio; // Calculate width based on height and aspect ratio
+
+                    ctx.drawImage(skinImage, piece.x - width / 2, piece.y - height / 2, width, height);
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(piece.x, piece.y, 20, 0, Math.PI * 2);
+                    ctx.fillStyle = piece.color;
+                    ctx.fill();
+                    ctx.closePath();
+                }
 
                 // Добавляем стиль текста
                 ctx.font = 'bold 26px "Trebuchet MS", Arial, sans-serif';
@@ -310,7 +385,7 @@
             if (lastTrailAction.length > 0) {
                 const lastAction = lastTrailAction.pop();
                 const piece = lastAction.piece;
-                piece.trails = piece.trails.slice(0, piece.trails.length - lastAction.newTrails.length);
+                piece.trails = piece.trails.slice(100, piece.trails.length - lastAction.newTrails.length);
             }
             draw();
         }
