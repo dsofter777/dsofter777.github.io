@@ -140,41 +140,41 @@
         });
 
         function addPieces(count) {
-    const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080'];
-    const baseX = canvas.width / 2;
-    const baseY = canvas.height / 2;
-    const spacing = 30;
-
-    for (let i = 0; i < count; i++) {
-        const color = colors[i % colors.length];
-        const angle = (i / count) * 2 * Math.PI;
-        const offsetX = Math.cos(angle) * spacing * (i % 5);
-        const offsetY = Math.sin(angle) * spacing * (i % 5);
-
-        const pieceIndex = pieces.length;
-        pieces.push({ x: baseX + offsetX, y: baseY + offsetY, color, isDragging: false, name: '', trails: [] });
-
-        const button = document.createElement('button');
-        button.className = 'name-button';
-        button.innerText = `Игрок ${pieceIndex + 1}`;
-        button.style.backgroundColor = color; // Устанавливаем цвет кнопки
-
-        // Определяем цвет текста для читаемости
-        const textColor = (color === '#FFFF00') ? '#000000' : '#FFFFFF';
-        button.style.color = textColor; // Цвет текста кнопки
-
-        document.getElementById('nameInputs').appendChild(button);
-
-        button.addEventListener('click', () => {
-            const newName = prompt('Введите новое название фишки:', pieces[pieceIndex].name);
-            if (newName !== null) {
-                pieces[pieceIndex].name = newName;
-                button.innerText = newName || `Игрок ${pieceIndex + 1}`;
+            const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080'];
+            const baseX = canvas.width / 2;
+            const baseY = canvas.height / 2;
+            const spacing = 30;
+        
+            for (let i = 0; i < count; i++) {
+                const color = colors[i % colors.length];
+                const angle = (i / count) * 2 * Math.PI;
+                const offsetX = Math.cos(angle) * spacing * (i % 5);
+                const offsetY = Math.sin(angle) * spacing * (i % 5);
+        
+                const pieceIndex = pieces.length;
+                pieces.push({ x: baseX + offsetX, y: baseY + offsetY, color, isDragging: false, name: '', trails: [] });
+        
+                const button = document.createElement('button');
+                button.className = 'name-button';
+                button.innerText = `Игрок ${pieceIndex + 1}`;
+                button.style.backgroundColor = color; // Устанавливаем цвет кнопки
+        
+                // Определяем цвет текста для читаемости
+                const textColor = (color === '#FFFF00') ? '#000000' : '#FFFFFF';
+                button.style.color = textColor; // Цвет текста кнопки
+        
+                document.getElementById('nameInputs').appendChild(button);
+        
+                button.addEventListener('click', () => {
+                    const newName = prompt('Введите новое название фишки:', pieces[pieceIndex].name);
+                    if (newName !== null) {
+                        pieces[pieceIndex].name = newName;
+                        button.innerText = newName || `Игрок ${pieceIndex + 1}`;
+                    }
+                });
             }
-        });
-    }
-    draw();
-}
+            draw();
+        }
 
         function createBackgroundButtons() {
             const buttonContainer = document.getElementById('backgroundButtons');
