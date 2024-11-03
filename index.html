@@ -144,27 +144,27 @@
             const baseX = canvas.width / 2;
             const baseY = canvas.height / 2;
             const spacing = 30;
-        
+
             for (let i = 0; i < count; i++) {
                 const color = colors[i % colors.length];
                 const angle = (i / count) * 2 * Math.PI;
                 const offsetX = Math.cos(angle) * spacing * (i % 5);
                 const offsetY = Math.sin(angle) * spacing * (i % 5);
-        
+
                 const pieceIndex = pieces.length;
                 pieces.push({ x: baseX + offsetX, y: baseY + offsetY, color, isDragging: false, name: '', trails: [] });
-        
+
                 const button = document.createElement('button');
                 button.className = 'name-button';
                 button.innerText = `Игрок ${pieceIndex + 1}`;
                 button.style.backgroundColor = color; // Устанавливаем цвет кнопки
-        
+
                 // Определяем цвет текста для читаемости
-                const textColor = (color === '#FFFF00') ? '#000000' : '#FFFFFF';
+                const textColor = '#FFFFFF';
                 button.style.color = textColor; // Цвет текста кнопки
-        
+
                 document.getElementById('nameInputs').appendChild(button);
-        
+
                 button.addEventListener('click', () => {
                     const newName = prompt('Введите новое название фишки:', pieces[pieceIndex].name);
                     if (newName !== null) {
@@ -228,15 +228,16 @@
                     piece.y = event.offsetY;
 
                     if (isRightMouseDown) {
-                        const steps = 100;
-                        const newTrails = [];
+                        // Определяем количество промежуточных точек для плавного следа
+                        const distance = Math.hypot(piece.x - prevX, piece.y - prevY);
+                        const steps = Math.ceil(distance / 5); // Чем больше шагов, тем плавнее линия
+
                         for (let i = 1; i <= steps; i++) {
                             const interpolatedX = prevX + (piece.x - prevX) * (i / steps);
                             const interpolatedY = prevY + (piece.y - prevY) * (i / steps);
-                            newTrails.push({ x: interpolatedX, y: interpolatedY, color: piece.color });
+                            piece.trails.push({ x: interpolatedX, y: interpolatedY, color: piece.color });
                         }
-                        piece.trails.push(...newTrails);
-                        lastTrailAction.push({ piece, newTrails });
+                        lastTrailAction.push({ piece, newTrails: [{ x: piece.x, y: piece.y, color: piece.color }] });
                     }
                 }
             });
@@ -253,28 +254,32 @@
             ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
 
             pieces.forEach(piece => {
+                // Рисуем фишку
                 ctx.beginPath();
                 ctx.arc(piece.x, piece.y, 20, 0, Math.PI * 2);
                 ctx.fillStyle = piece.color;
                 ctx.fill();
                 ctx.closePath();
 
-                // Определяем цвет текста
-                const textColor = piece.color === '#FFFF00' ? '#000000' : '#FFFFFF';
-                
-                // Устанавливаем стиль текста и контур
-                ctx.font = 'bold 24px Arial';
+                // Добавляем стиль текста
+                ctx.font = 'bold 26px "Trebuchet MS", Arial, sans-serif';
                 ctx.textAlign = 'center';
-                ctx.lineWidth = 4; // Толщина контура
-
-                // Рисуем контур текста
-                ctx.strokeStyle = '#000000'; // Цвет контура
-                ctx.strokeText(piece.name, piece.x, piece.y - 10); // Рисуем контур
+                ctx.textBaseline = 'middle';
                 
-                // Рисуем текст
-                ctx.fillStyle = textColor; // Цвет текста
-                ctx.fillText(piece.name, piece.x, piece.y - 10); // Рисуем текст
+                // Добавляем тень
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+                ctx.shadowOffsetX = 2;
+                ctx.shadowOffsetY = 2;
+                ctx.shadowBlur = 5;
 
+                // Рисуем текст
+                ctx.fillStyle = piece.color === '#FFFF00' ? '#000000' : '#FFFFFF';
+                ctx.fillText(piece.name, piece.x, piece.y - 10);
+
+                // Отключаем тень после использования
+                ctx.shadowColor = 'transparent';
+
+                // Рисуем следы
                 piece.trails.forEach(trail => {
                     ctx.beginPath();
                     ctx.arc(trail.x, trail.y, 5, 0, Math.PI * 2);
