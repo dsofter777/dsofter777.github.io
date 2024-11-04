@@ -54,6 +54,8 @@
             border-radius: 5px;
             padding: 10px;
             z-index: 3;
+            max-height: 300px;
+            overflow-y: auto; 
         }
         input[type="number"] {
             width: calc(100% - 10px);
@@ -270,26 +272,46 @@
         }
 
 
-        function showSkinMenu(pieceIndex, button) {
+       function showSkinMenu(pieceIndex, button) {
             const skinMenu = document.getElementById('skinMenu');
             skinMenu.style.display = 'block';
-            skinMenu.style.top = button.offsetTop + button.offsetHeight + 'px'; // Позиционируем меню под кнопкой
-            skinMenu.style.left = button.offsetLeft + 'px'; // Позиционируем меню под кнопкой
 
-            // Очищаем меню перед добавлением новых скинов
-            skinMenu.innerHTML = '';
+            // Устанавливаем позиции
+            skinMenu.style.top = button.getBoundingClientRect().bottom + 'px'; 
+            skinMenu.style.left = button.getBoundingClientRect().left + 'px'; 
+
+            const menuHeight = skinMenu.offsetHeight;
+            const windowHeight = window.innerHeight;
+
+            if (parseInt(skinMenu.style.top) + menuHeight > windowHeight) {
+                skinMenu.style.top = (button.getBoundingClientRect().top - menuHeight) + 'px';
+            }
+
+            if (parseInt(skinMenu.style.left) < 0) {
+                skinMenu.style.left = '0px';
+            }
+
+            skinMenu.innerHTML = ''; // Очищаем меню перед добавлением новых скинов
 
             // Добавляем изображения скинов в меню
-            skins.forEach((skin, index) => {
+            skins.forEach((skin) => {
                 const img = document.createElement('img');
                 img.src = skin;
                 img.className = 'skin-image';
+
+                img.onload = () => {
+                    skinMenu.appendChild(img); // Добавляем скин в меню только после загрузки
+                };
+                img.onerror = () => {
+                    console.error(`Не удалось загрузить скин: ${skin}`); // Логируем ошибку, если скин не загрузился
+                };
+
+                // Обработчик на клик по изображению скина
                 img.addEventListener('click', () => {
                     pieces[pieceIndex].skin = skin; // Применяем выбранный скин
                     skinMenu.style.display = 'none'; // Скрываем меню
                     draw(); // Перерисовываем канвас
                 });
-                skinMenu.appendChild(img);
             });
         }
 
