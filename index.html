@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>vzp</title>
     <link rel="icon" type="image/png" href="icon.png">
+    <!-- Подключаем шрифт Exo 2 из Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0;
@@ -27,7 +29,7 @@
             top: 10px;
             right: 10px;
             z-index: 1;
-            background-color: rgba(255, 255, 255, 0.9);
+            background-color: rgba(0, 0, 0, 0.9);
             padding: 15px;
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
@@ -39,7 +41,7 @@
             top: 10px;
             right: 270px; /* Отодвигаем кнопку от меню */
             z-index: 2;
-            background-color: #007BFF;
+            background-color: #000000;
             color: white;
             border: none;
             border-radius: 5px;
@@ -47,7 +49,9 @@
             font-weight: bold;
         }
         #skinMenu {
-            display: none; /* Скрываем меню скинов по умолчанию */
+            display: none; /* Скрываем окно по умолчанию */
+            grid-template-columns: repeat(3, 1fr); /* 3 столбца */
+            gap: 10px; /* Отступы между скинами */
             position: absolute;
             background-color: rgba(255, 255, 255, 0.9);
             border: 1px solid #007BFF;
@@ -55,7 +59,12 @@
             padding: 10px;
             z-index: 3;
             max-height: 300px;
-            overflow-y: auto; 
+            overflow-y: auto;
+            width: 250px; /* Увеличиваем ширину */
+            box-sizing: border-box; /* Учитываем padding в ширину */
+            top: 50%; /* Центрируем по вертикали */
+            left: 50%; /* Центрируем по горизонтали */
+            transform: translate(-50%, -50%); /* Сдвигаем на половину ширины и высоты */
         }
         input[type="number"] {
             width: calc(100% - 10px);
@@ -94,12 +103,35 @@
             cursor: pointer; /* Указатель на картинку */
             margin: 5px; /* Отступы между картинками */
         }
+        .button-container {
+            display: flex; /* Горизонтальное выравнивание */
+            align-items: center; /* Вертикальное выравнивание по центру */
+            margin-bottom: 10px; /* Отступ снизу */
+        }
+        
+        /* Применяем шрифт Exo 2 и белый цвет для текста внутри label */
+        label {
+            font-family: 'Exo 2', sans-serif; /* Устанавливаем шрифт Exo 2 */
+            color: white; /* Белый цвет текста */
+            font-size: 16px; /* Размер шрифта */
+        }
+
+        /* Дополнительно можно задать стиль для самого чекбокса, если нужно */
+        input[type="checkbox"] {
+            margin-right: 10px; /* Отступ справа от чекбокса */
+        }
     </style>
 </head>
 <body>
     <button id="menuToggle">☰</button> <!-- Кнопка для открытия/закрытия меню -->
     <div id="controls">
         <input type="number" id="pieceCount" placeholder="Количество фишек" min="1">
+        <div>
+            <label>
+                <input type="checkbox" id="numberingCheckbox" checked>
+                Пронумеровать фишки
+            </label>
+        </div>
         <button id="addPiecesButton" class="name-button">+ Add Playa</button>
         <button id="addEnemiesButton" class="name-button">+ Add Enemy</button>
         <div id="nameInputs"></div>
@@ -188,51 +220,63 @@
         });
 
         function addPieces(count) {
-            const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080'];
-            const baseX = 100; // Fixed X position for players (left side)
-            const baseY = canvas.height / 2; // Center vertically
-            const spacing = 50; // Increased spacing between players
-            const maxPerRow = 10; // Maximum pieces in one row
+            const colors = [
+                '#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#00FFFF', 
+                '#0000FF', '#4B0082', '#9400D3', '#FF1493', '#FFD700', 
+                '#800080', '#FF4500', '#FF6347', '#FF69B4', '#00FA9A', 
+                '#1E90FF', '#7B68EE', '#ADFF2F', '#8A2BE2', '#FF8C00', 
+                '#20B2AA', '#FFB6C1', '#BA55D3', '#00CED1', '#4682B4', 
+                '#DDA0DD',
+            ];
+            const baseX = 100;
+            const baseY = canvas.height / 2;
+            const spacing = 50;
+            const maxPerRow = 10;
 
             for (let i = 0; i < count; i++) {
                 const color = colors[i % colors.length];
-                const row = Math.floor(i / maxPerRow); // Determine the current row
-                const column = i % maxPerRow; // Determine the column within the row
-                const offsetY = row * spacing; // Vertical spacing for each row
-                const offsetX = column * spacing; // Horizontal spacing for each column
+                const row = Math.floor(i / maxPerRow);
+                const column = i % maxPerRow;
+                const offsetY = row * spacing;
+                const offsetX = column * spacing;
 
                 const pieceIndex = pieces.length;
                 pieces.push({ x: baseX + offsetX, y: baseY + offsetY, color, isDragging: false, name: '', trails: [], skin: null });
 
+                // Создаем контейнер для кнопок
                 const buttonContainer = document.createElement('div');
+                buttonContainer.classList.add('button-container');  // Добавляем класс для горизонтального выравнивания
 
+                // Кнопка для изменения имени
                 const button = document.createElement('button');
                 button.className = 'name-button';
-                button.innerText = `Игрок ${pieceIndex + 1}`;
-                button.style.backgroundColor = color; // Устанавливаем цвет кнопки
-                button.style.color = '#FFFFFF'; // Цвет текста кнопки
+                button.style.backgroundColor = color;
+                button.style.color = '#FFFFFF';
                 buttonContainer.appendChild(button);
 
-                // Кнопка выбора скина
+                // Кнопка для выбора скина
                 const skinButton = document.createElement('button');
                 skinButton.className = 'skin-button';
                 skinButton.innerText = 'Скин';
-                skinButton.style.backgroundColor = color; // Устанавливаем цвет кнопки скина
+                skinButton.style.backgroundColor = color;
                 buttonContainer.appendChild(skinButton);
 
-                // Добавляем контейнер с кнопками в UI
                 document.getElementById('nameInputs').appendChild(buttonContainer);
 
-                // Обработчик на кнопку имени
+                // Устанавливаем имя фишки, если чекбокс включен
+                if (document.getElementById('numberingCheckbox').checked) {
+                    pieces[pieceIndex].name = (pieceIndex + 1).toString();
+                    button.innerText = `Игрок ${pieceIndex + 1}`;
+                }
+
                 button.addEventListener('click', () => {
                     const newName = prompt('Введите новое название фишки:', pieces[pieceIndex].name);
                     if (newName !== null) {
-                        pieces[pieceIndex].name = newName;
-                        button.innerText = newName || `Игрок ${pieceIndex + 1}`;
+                        pieces[pieceIndex].name = newName || (pieceIndex + 1).toString();
+                        button.innerText = pieces[pieceIndex].name;
                     }
                 });
 
-                // Обработчик на кнопку выбора скина
                 skinButton.addEventListener('click', () => {
                     showSkinMenu(pieceIndex, skinButton);
                 });
