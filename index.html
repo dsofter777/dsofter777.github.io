@@ -441,70 +441,70 @@
         }
 
         function draw() {
-            // Рисуем фон
-            ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
-        
-            // Сначала рисуем следы
-            pieces.forEach(piece => {
-                // Рисуем следы
-                piece.trails.forEach(trail => {
-                    ctx.beginPath();
-                    ctx.arc(trail.x, trail.y, 5, 0, Math.PI * 2);
-                    ctx.fillStyle = trail.color;
-                    ctx.fill();
-                    ctx.closePath();
-                });
-            });
-        
-            // Затем рисуем фишки
-            pieces.forEach(piece => {
-                // Рисуем фишку с скином, если он есть
-                if (piece.skin) {
-                    const skinImage = new Image();
-                    skinImage.src = piece.skin;
-        
-                    const aspectRatio = 16 / 9; // 16:9 aspect ratio
-                    const height = 80; // Установите желаемую высоту
-                    const width = height * aspectRatio; // Рассчитываем ширину на основе высоты и соотношения сторон
-        
-                    ctx.drawImage(skinImage, piece.x - width / 2, piece.y - height / 2, width, height);
-                    
-                    // Рисуем тень для текста
-                    ctx.shadowColor = 'rgba(0, 0, 0, 0.7)'; // Черная тень
-                    ctx.shadowOffsetX = 2; // Смещение тени по оси X
-                    ctx.shadowOffsetY = 2; // Смещение тени по оси Y
-                    ctx.shadowBlur = 4; // Размытие тени
-        
-                    // Рисуем текст с тенью
-                    ctx.fillStyle = piece.color === '#FFFF00' ? '#000000' : '#FFFFFF';
-                    ctx.fillText(piece.name, piece.x, piece.y - height / 2 - 10); // Смещаем текст вверх
-                } else {
-                    ctx.beginPath();
-                    ctx.arc(piece.x, piece.y, 20, 0, Math.PI * 2);
-                    ctx.fillStyle = piece.color;
-                    ctx.fill();
-                    ctx.closePath();
-        
-                    // Добавляем стиль текста
-                    ctx.font = 'bold 26px "Trebuchet MS", Arial, sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-        
-                    // Рисуем тень для текста
-                    ctx.shadowColor = 'rgba(0, 0, 0, 0.7)'; // Черная тень
-                    ctx.shadowOffsetX = 2; // Смещение тени по оси X
-                    ctx.shadowOffsetY = 2; // Смещение тени по оси Y
-                    ctx.shadowBlur = 4; // Размытие тени
-        
-                    // Рисуем текст с тенью
-                    ctx.fillStyle = piece.color === '#FFFF00' ? '#000000' : '#FFFFFF';
-                    ctx.fillText(piece.name, piece.x, piece.y - 10);
-        
-                    // Отключаем тень после использования
-                    ctx.shadowColor = 'transparent';
-                }
-            });
+    // Рисуем фон
+    ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+
+    // Сначала рисуем следы
+    pieces.forEach(piece => {
+        // Рисуем следы без тени
+        piece.trails.forEach(trail => {
+            ctx.beginPath();
+            ctx.arc(trail.x, trail.y, 5, 0, Math.PI * 2);
+            ctx.fillStyle = trail.color;
+            ctx.fill();
+            ctx.closePath();
+        });
+    });
+
+    // Затем рисуем фишки
+    pieces.forEach(piece => {
+        // Рисуем фишку с скином, если он есть
+        if (piece.skin) {
+            const skinImage = new Image();
+            skinImage.src = piece.skin;
+
+            const aspectRatio = 16 / 9; // 16:9 aspect ratio
+            const height = 80; // Установите желаемую высоту
+            const width = height * aspectRatio; // Рассчитываем ширину на основе высоты и соотношения сторон
+
+            ctx.drawImage(skinImage, piece.x - width / 2, piece.y - height / 2, width, height);
+
+            // Рисуем только текст с тенью
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.7)'; // Черная тень
+            ctx.shadowOffsetX = 2; // Смещение тени по оси X
+            ctx.shadowOffsetY = 2; // Смещение тени по оси Y
+            ctx.shadowBlur = 4; // Размытие тени
+
+            // Рисуем текст с тенью
+            ctx.fillStyle = piece.color === '#FFFF00' ? '#000000' : '#FFFFFF';
+            ctx.fillText(piece.name, piece.x, piece.y - height / 2 - 10); // Смещаем текст вверх
+        } else {
+            ctx.beginPath();
+            ctx.arc(piece.x, piece.y, 20, 0, Math.PI * 2);
+            ctx.fillStyle = piece.color;
+            ctx.fill();
+            ctx.closePath();
+
+            // Добавляем стиль текста
+            ctx.font = 'bold 26px "Trebuchet MS", Arial, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // Рисуем только текст с тенью
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.7)'; // Черная тень
+            ctx.shadowOffsetX = 2; // Смещение тени по оси X
+            ctx.shadowOffsetY = 2; // Смещение тени по оси Y
+            ctx.shadowBlur = 4; // Размытие тени
+
+            // Рисуем текст с тенью
+            ctx.fillStyle = piece.color === '#FFFF00' ? '#000000' : '#FFFFFF';
+            ctx.fillText(piece.name, piece.x, piece.y - 10);
+
+            // Отключаем тень после использования
+            ctx.shadowColor = 'transparent';
         }
+    });
+}
 
         canvas.addEventListener('contextmenu', (event) => {
             event.preventDefault();
