@@ -151,30 +151,31 @@
         let lastTrailAction = [];
 
         const backgrounds = [
-            'байкерка.png',
-            'бк.png',
-            'бладсы.png',
-            'грейпсид.png',
-            'зерно.png',
-            'кайо.png',
-            'каньон.png',
-            'лес.png',
-            'лесопилка.png',
-            'ломатьнестроить.png',
-            'малыеконты.png',
-            'мексы.png',
-            'миррор.png',
-            'мусор.png',
-            'мясо.png',
-            'нг.png',
-            'нефть.png',
-            'ограбы.png',
-            'поезда.png',
-            'самолеты.png',
-            'сталь.png',
-            'стеб.png',
-            'стройка.png',
-            'тшка.png',
+            'СТРОЙКА БИЗВАР.jpg',
+            'ДИНОЗАВРИК.png',
+            'БОЛЬШИЕ КОНТЫ.png',
+            'БЛАДСЫ.png',
+            'ГРЕЙПСИД.png',
+            'ЗЕРНО.png',
+            'КАЙО ПЕРИКО.png',
+            'ТЕПЛИЦЫ.png',
+            'КВАДРИКИ.png',
+            'ЛЕСОПИЛКА.png',
+            'ЛНС.png',
+            'МАЛЫЕ КОНТЫ.png',
+            'МЕКСЫ.png',
+            'МИРОР.png',
+            'МУСОР.png',
+            'МЯСО.png',
+            'НГ.png',
+            'НЕФТЬ.png',
+            'ОГРАБЫ.png',
+            'ПОЕЗДА.png',
+            'САМОЛЕТЫ.png',
+            'СТАЛЬ.png',
+            'ДЕРЕВНЯ БАЙКЕРОВ.png',
+            'СТРОЙКА.png',
+            'ТШКА.png',
         ];
         let currentBackgroundIndex = 0;
         const backgroundImage = new Image();
@@ -366,11 +367,23 @@
                 const button = document.createElement('button');
                 button.className = 'background-button';
                 const backgroundName = background.split('.')[0]; 
-                button.innerText = backgroundName; 
+                button.innerText = backgroundName;
+
                 button.addEventListener('click', () => {
+                    // Сразу меняем индекс текущего фона
                     currentBackgroundIndex = index;
-                    backgroundImage.src = backgrounds[currentBackgroundIndex];
+                    // Создаем новый объект изображения и загружаем его
+                    const newBackgroundImage = new Image();
+                    newBackgroundImage.src = backgrounds[currentBackgroundIndex];
+
+                    // Событие загрузки изображения
+                    newBackgroundImage.onload = () => {
+                        // Как только изображение загружено, обновляем фоновое изображение
+                        backgroundImage.src = newBackgroundImage.src;
+                        draw(); // Перерисовываем канвас с новым фоном
+                    };
                 });
+
                 buttonContainer.appendChild(button);
             });
         }
