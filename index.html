@@ -7,12 +7,14 @@
     <link rel="icon" type="image/png" href="icon.png">
     <!-- Подключаем шрифт Exo 2 из Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
             margin: 0;
             overflow: hidden;
             display: flex;
             font-family: Arial, sans-serif;
+            cursor: crosshair;
         }
         canvas {
             border: 1px solid #000;
@@ -120,10 +122,222 @@
         input[type="checkbox"] {
             margin-right: 10px; /* Отступ справа от чекбокса */
         }
+
+        #tools {
+            position: absolute;
+            top: 40px;
+            left: 50%; /* по горизонтали */
+            transform: translateX(-50%);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .tool-button {
+            padding: 15px;
+            margin: 5px;
+            cursor: pointer;
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .tool-button:hover {
+            background-color: #000000;
+            color: #ff0000; /* Иконка станет красной */
+        }
+
+        .tool-button i {
+            font-size: 20px;
+            color: #000;  /* Белый цвет иконки по умолчанию */
+            transition: color 0.3s ease;
+        }
+
+        .tool-button:hover i {
+            color: #ff0000; /* Иконка будет красной при наведении */
+        }
+
+        /* Выравнивание кнопки с тремя тире справа */
+        #tools-container {
+            position: absolute;
+            top: 10px;
+            right: 310px;
+            z-index: 2;
+            display: flex;
+            justify-content: flex-end; /* Позиционирование кнопки справа */
+            width: 100%;
+        }
+
+        #lineThickness {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            margin-left: 20px;
+        }
+
+       /* Стиль для ползунка */
+        #lineThickness input {
+            margin-left: 10px;
+            -webkit-appearance: none;
+            appearance: none;
+            width: 120px;
+            height: 12px;
+            background: #ffffff; /* Белый цвет фона */
+            border: 1px solid #ccc; /* Светлый цвет рамки */
+            border-radius: 6px; /* Закругленные углы */
+            transition: background 0.3s ease, transform 0.3s ease; /* Плавные переходы */
+        }
+
+        #lineThickness input:hover {
+            background: #ffcccc; /* Светлый красный фон при наведении */
+            transform: scale(1.05); /* Легкое увеличение при наведении */
+        }
+
+        /* Стиль для ползунка (кнопки) */
+        #lineThickness input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #ffffff; /* Белый цвет для ползунка */
+            border: 2px solid #ccc; /* Светлая рамка */
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); /* Легкая тень */
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        /* Изменение цвета ползунка при наведении на него */
+        #lineThickness input::-webkit-slider-thumb:hover {
+            background-color: #000000; /* Красный цвет при наведении */
+            border-color: #ffffff;     /* Красная рамка при наведении */
+            transform: scale(1.2); /* Увеличение ползунка при наведении */
+        }
+
+        /* Стиль для отображения значения толщины */
+        #thicknessValue {
+            font-weight: 600; /* Жирный шрифт */
+            font-size: 18px;   /* Увеличиваем размер шрифта */
+            margin-left: 15px;
+            color: #333;       /* Темно-серый цвет текста */
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2); /* Тень для цифры */
+            transition: color 0.3s ease, transform 0.3s ease; /* Плавные переходы */
+        }
+
+        #thicknessValue:hover {
+            color: #000000; /* Цвет текста при наведении (черный) */
+            transform: scale(1.1); /* Легкое увеличение текста */
+        }
+
+        /* Стиль для скрытия/показа панели инструментов */
+        #tools.hidden {
+            display: none;
+        }
+
+        /* Стилизация кнопки с тремя тире */
+        #toggleButton {
+            padding: 10px;
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 24px;  /* Увеличиваем размер шрифта для тире */
+            font-weight: bold;  /* Жирный шрифт */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-left: 20px;
+        }
+
+        #colorPicker {
+            display: flex;
+            align-items: center;
+            margin-left: 10px;
+        }
+
+        /* Кнопка выбора цвета */
+        #colorButton {
+            width: 40px;
+            height: 40px;
+            background-color: #000000; /* Начальный цвет */
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        /* Эффект при наведении на кнопку */
+        #colorButton:hover {
+            transform: scale(1.1);
+        }
+
+        /* Скрытый input для выбора цвета */
+        #colorInput {
+            display: none;
+        }
+        #cursorEffect {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: transparent;
+            pointer-events: none;
+            z-index: 9999;
+            animation: pulse 1s infinite;
+            transform-origin: center;
+            box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.2); /* Добавляем легкое свечение */
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.2);  /* Свечение при нормальном размере */
+            }
+            50% {
+                transform: scale(1.5);  /* Увеличение размера */
+                box-shadow: 0 0 20px 5px rgba(0, 0, 0, 0.3);  /* Усиленное свечение */
+            }
+            100% {
+                transform: scale(1);  /* Снова нормальный размер */
+                box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.2);  /* Свечение при нормальном размере */
+            }
+        }
+
+
     </style>
 </head>
 <body>
     <button id="menuToggle">☰</button> <!-- Кнопка для открытия/закрытия меню -->
+    <!-- Контейнер для панели инструментов с кнопкой справа -->
+    <div id="tools-container">
+        <!-- Кнопка для сворачивания/разворачивания инструментов -->
+        <button id="toggleButton">—</button>
+    </div>
+
+    <div id="tools">
+        <button class="tool-button" id="eraser"><i class="fas fa-eraser"></i></button>
+        <button class="tool-button" id="line"><i class="fas fa-slash"></i></button>
+        <button class="tool-button" id="dashed"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+        <button class="tool-button" id="arrow"><i class="fas fa-long-arrow-alt-right"></i></button>
+        <button class="tool-button" id="flashColorButton"><i class="fas fa-lightbulb"></i></button>
+
+         <div id="colorPicker">
+            <button id="colorButton"></button>
+            <input type="color" id="colorInput" value="#000000">
+        </div>
+        <!-- Ползунок толщины после кнопки Стрелка -->
+        <div id="lineThickness">
+            <input type="range" id="thickness" min="1" max="50" value="1">
+            <span id="thicknessValue">2</span>
+        </div>
+    </div>
+    </div>
     <div id="controls">
         <input type="number" id="pieceCount" placeholder="Количество фишек" min="1">
         <div>
@@ -137,18 +351,86 @@
         <div id="nameInputs"></div>
         <div id="backgroundButtons"></div>
     </div>
+
     <canvas id="gameCanvas"></canvas>
     <div id="skinMenu"></div> <!-- Меню для выбора скинов -->
+
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
+
+
 
         let pieces = [];
         let isRightMouseDown = false;
         let lastTrailAction = [];
+        let isDrawing = false;
+        let startX = 0, startY = 0;
+        let endX = 0, endY = 0;
+        let currentTool = 'line';  // Установим начальный инструмент как "line"
+        let lineThickness = 2;
+        let lineColor = '#000000'; 
+        let hoveredLine = null;
+        let hoverProgress = 0; // Прогресс увеличения толщины линии
+        let hoverDirection = 0; // Направление изменения толщины (увеличение или уменьшение)
+        const flashColorButton = document.getElementById('flashColorButton');
+        let cursorEffect = null;
+        let isFlashing = false;
+
+        // Создаем элемент для эффекта мигания курсора
+        function createCursorEffect(color) {
+            // Если курсор уже существует, удалим его перед созданием нового
+            if (cursorEffect) {
+                cursorEffect.remove();
+            }
+
+            cursorEffect = document.createElement('div');
+            cursorEffect.id = 'cursorEffect';
+            cursorEffect.style.backgroundColor = color;  // Устанавливаем цвет для подсветки
+            document.body.appendChild(cursorEffect);
+        }
+
+        // Включаем мигание и следим за движением мыши
+        flashColorButton.addEventListener('click', () => {
+            // Проверяем, мигает ли уже курсор
+            if (isFlashing) return;
+
+            isFlashing = true;
+            const color = colorInput.value;
+            createCursorEffect(color);
+
+            // Следим за перемещением курсора
+            document.addEventListener('mousemove', moveCursorEffect);
+            
+            // По прошествии 3 секунд прекращаем мигание
+            setTimeout(() => {
+                removeCursorEffect();
+                isFlashing = false;
+            }, 10000);
+        });
+
+        // Обработчик перемещения курсора
+        function moveCursorEffect(e) {
+            if (cursorEffect) {
+                const x = e.clientX - cursorEffect.offsetWidth / 2;
+                const y = e.clientY - cursorEffect.offsetHeight / 2;
+                cursorEffect.style.left = `${x}px`;
+                cursorEffect.style.top = `${y}px`;
+            }
+        }
+
+        // Удаляем эффект мигания
+        function removeCursorEffect() {
+            if (cursorEffect) {
+                cursorEffect.remove();
+                cursorEffect = null;
+            }
+        }
+        const colorButton = document.getElementById('colorButton');
+        const colorInput = document.getElementById('colorInput');
+        const drawnLines = []; // Хранилище нарисованных линий
 
         const backgrounds = [
             'СТРОЙКА БИЗВАР.jpg',
@@ -184,9 +466,13 @@
         let currentBackgroundIndex = 0;
         const backgroundImage = new Image();
         backgroundImage.src = backgrounds[currentBackgroundIndex];
+        backgroundImage.onload = function() {
+            // Как только изображение загружено, рисуем его на канвасе
+            ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+        };
 
         // Массив с скинами (предполагается, что изображения находятся в одной папке)
-        const skins = [
+         const skins = [
             'skin1.png',
             'skin2.png',
             'skin3.png',
@@ -437,59 +723,6 @@
             controls.style.display = controls.style.display === 'none' || controls.style.display === '' ? 'block' : 'none';
         });
 
-        canvas.addEventListener('mousedown', (event) => {
-            if (event.button === 0) { // Left mouse button
-                // Find the topmost piece under the mouse cursor
-                let foundPiece = null;
-                for (let i = pieces.length - 1; i >= 0; i--) { // Check from topmost to bottom
-                    if (isMouseOverPiece(event.offsetX, event.offsetY, pieces[i])) {
-                        foundPiece = pieces[i];
-                        break; // Stop at the first piece found
-                    }
-                }
-                if (foundPiece) {
-                    foundPiece.isDragging = true; // Only set dragging for the found piece
-                }
-            } else if (event.button === 2) {
-                isRightMouseDown = true; // Right mouse button logic (if needed)
-            }
-        });
-
-        canvas.addEventListener('mouseup', (event) => {
-            if (event.button === 0) {
-                pieces.forEach(piece => {
-                    piece.isDragging = false; // Stop dragging for all pieces on mouse up
-                });
-            } else if (event.button === 2) {
-                isRightMouseDown = false; // Right mouse button release
-            }
-        });
-
-        canvas.addEventListener('mousemove', (event) => {
-            pieces.forEach(piece => {
-                if (piece.isDragging) {
-                    const prevX = piece.x;
-                    const prevY = piece.y;
-
-                    piece.x = event.offsetX;
-                    piece.y = event.offsetY;
-
-                    if (isRightMouseDown) {
-                        // Create trails logic
-                        const distance = Math.hypot(piece.x - prevX, piece.y - prevY);
-                        const steps = Math.ceil(distance / 5); // Adjust trail smoothness
-
-                        for (let i = 1; i <= steps; i++) {
-                            const interpolatedX = prevX + (piece.x - prevX) * (i / steps);
-                            const interpolatedY = prevY + (piece.y - prevY) * (i / steps);
-                            piece.trails.push({ x: interpolatedX, y: interpolatedY, color: piece.color });
-                        }
-                        lastTrailAction.push({ piece, newTrails: [{ x: piece.x, y: piece.y, color: piece.color }] });
-                    }
-                }
-            });
-            draw(); // Redraw the canvas after moving
-        });
 
         function isMouseOverPiece(mouseX, mouseY, piece) {
             const radius = 20;
@@ -499,8 +732,10 @@
 
         function draw() {
     // Рисуем фон
-    ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
-
+    // Сначала рисуем фон (если нужно, фоновое изображение)
+        ctx.clearRect(backgroundImage, 0, 0, canvas.width, canvas.height);
+        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+        redrawAllLines();
     // Сначала рисуем следы
     pieces.forEach(piece => {
         // Рисуем следы без тени
@@ -521,7 +756,7 @@
             skinImage.src = piece.skin;
 
             const aspectRatio = 16 / 9; // 16:9 aspect ratio
-            const height = 60; // Установите желаемую высоту
+            const height = 65; // Установите желаемую высоту
             const width = height * aspectRatio; // Рассчитываем ширину на основе высоты и соотношения сторон
 
             ctx.drawImage(skinImage, piece.x - width / 2, piece.y - height / 2, width, height);
@@ -587,6 +822,477 @@
             }
             draw();
         }
+
+
+function getCanvasCoordinates(e) {
+    const rect = canvas.getBoundingClientRect();
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+}
+
+// Обработчик для кнопки выбора цвета
+colorButton.addEventListener('click', () => {
+    colorInput.click();  // Программно кликаем по скрытому input, чтобы открыть панель выбора
+});
+
+// Обработчик для изменения цвета при выборе цвета в панели
+colorInput.addEventListener('input', (e) => {
+    lineColor = e.target.value;  // Обновляем цвет
+    colorButton.style.backgroundColor = lineColor;  // Обновляем фон кнопки
+    if (cursorEffect) {
+        cursorEffect.style.backgroundColor = newColor;
+    }
+});
+
+drawnLines.push({ 
+    tool: currentTool, 
+    startX, 
+    startY, 
+    endX, 
+    endY, 
+    lineThickness, 
+    lineColor 
+});
+
+
+function startDrawing(e) {
+    isDrawing = true;
+    const coords = getCanvasCoordinates(e);
+    startX = coords.x;
+    startY = coords.y;
+}
+
+function stopDrawing(e) {
+    if (!isDrawing) return;
+
+    const coords = getCanvasCoordinates(e);
+    endX = coords.x;
+    endY = coords.y;
+
+    if (currentTool === 'line') {
+        drawFixedLine();
+        drawnLines.push({ tool: 'line', startX, startY, endX, endY, lineThickness, lineColor });
+    } else if (currentTool === 'dashed') {
+        drawFixedDashedLine();
+        drawnLines.push({ tool: 'dashed', startX, startY, endX, endY, lineThickness, lineColor });
+    } else if (currentTool === 'arrow') {
+        drawFixedArrow();
+        drawnLines.push({ tool: 'arrow', startX, startY, endX, endY, lineThickness, lineColor });
+    }
+
+    isDrawing = false;
+    ctx.beginPath();
+}
+
+function isErasing(line, x, y, eraseSize) {
+    const dx = line.endX - line.startX;
+    const dy = line.endY - line.startY;
+    const length = Math.sqrt(dx * dx + dy * dy);
+
+    const t = ((x - line.startX) * dx + (y - line.startY) * dy) / (length * length);
+    const closestX = line.startX + t * dx;
+    const closestY = line.startY + t * dy;
+
+    const distance = Math.sqrt((x - closestX) ** 2 + (y - closestY) ** 2);
+    return distance <= eraseSize / 2;
+}
+
+function erase(e) {
+    if (!isDrawing) return;
+
+    const coords = getCanvasCoordinates(e);
+    const eraseSize = lineThickness * 5;
+
+    for (let i = drawnLines.length - 1; i >= 0; i--) {
+        const line = drawnLines[i];
+        if (isErasing(line, coords.x, coords.y, eraseSize)) {
+            drawnLines.splice(i, 1);
+        }
+    }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    redrawAllLines();
+}
+
+function drawEraserIndicator(e) {
+    const coords = getCanvasCoordinates(e);
+    const eraseSize = lineThickness * 5;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    redrawAllLines();
+
+    ctx.beginPath();
+    ctx.arc(coords.x, coords.y, eraseSize / 2, 0, Math.PI * 2, false);
+    ctx.strokeStyle = '#00000033';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+}
+
+function drawTemporaryLine(event) {
+    const coords = getCanvasCoordinates(e);
+    endX = coords.x;
+    endY = coords.y;
+
+    redrawAllLines();
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(endX, endY);
+    ctx.lineWidth = lineThickness;
+    ctx.strokeStyle = lineColor;
+    ctx.stroke();
+}
+
+function drawFixedLine() {
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(endX, endY);
+    ctx.lineWidth = lineThickness;
+    ctx.strokeStyle = lineColor;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+}
+
+function drawTemporaryDashedLine(e) {
+    const coords = getCanvasCoordinates(e);
+    endX = coords.x;
+    endY = coords.y;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    redrawAllLines();
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.setLineDash([lineThickness * 2, lineThickness * 2]);
+    ctx.lineTo(endX, endY);
+    ctx.lineWidth = lineThickness;
+    ctx.strokeStyle = lineColor;
+    ctx.stroke();
+    ctx.setLineDash([]);
+}
+
+function drawFixedDashedLine() {
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.setLineDash([lineThickness * 2, lineThickness * 2]);
+    ctx.lineTo(endX, endY);
+    ctx.lineWidth = lineThickness;
+    ctx.strokeStyle = lineColor;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+    ctx.setLineDash([]);
+}
+
+function drawTemporaryArrow(e) {
+    const coords = getCanvasCoordinates(e);
+    endX = coords.x;
+    endY = coords.y;
+
+    // Очистка холста и перерисовка всех линий
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    redrawAllLines();
+
+    // Рисуем временную линию
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(endX, endY);
+    ctx.lineWidth = lineThickness;
+    ctx.strokeStyle = lineColor;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    // Вычисление угла стрелки
+    const angle = Math.atan2(endY - startY, endX - startX);
+    const arrowLength = 15;  // Длина стрелки
+    const arrowAngle = Math.PI / 6;  // Угол стрелки
+
+    // Рисование временной стрелки
+    ctx.beginPath();
+    ctx.moveTo(endX, endY);
+    ctx.lineTo(
+        endX - arrowLength * Math.cos(angle - arrowAngle),
+        endY - arrowLength * Math.sin(angle - arrowAngle)
+    );
+    ctx.moveTo(endX, endY);
+    ctx.lineTo(
+        endX - arrowLength * Math.cos(angle + arrowAngle),
+        endY - arrowLength * Math.sin(angle + arrowAngle)
+    );
+    ctx.stroke();
+}
+
+function drawFixedArrow() {
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(endX, endY);
+    ctx.lineWidth = lineThickness;
+    ctx.strokeStyle = lineColor;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    // Вычисление угла стрелки
+    const angle = Math.atan2(endY - startY, endX - startX);
+    const arrowLength = 15;  // Длина стрелки
+    const arrowAngle = Math.PI / 6;  // Угол стрелки
+
+    // Рисование конечной стрелки
+    ctx.beginPath();
+    ctx.moveTo(endX, endY);
+    ctx.lineTo(
+        endX - arrowLength * Math.cos(angle - arrowAngle),
+        endY - arrowLength * Math.sin(angle - arrowAngle)
+    );
+    ctx.moveTo(endX, endY);
+    ctx.lineTo(
+        endX - arrowLength * Math.cos(angle + arrowAngle),
+        endY - arrowLength * Math.sin(angle + arrowAngle)
+    );
+    ctx.stroke();
+}
+
+
+// Параметры анимации
+const hoverDuration = 300; // Продолжительность анимации увеличения в миллисекундах
+const fadeDuration = 500; // Продолжительность анимации уменьшения в миллисекундах
+
+// Функция для прорисовки всех линий
+function redrawAllLines() {
+    ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+
+    drawnLines.forEach(line => {
+        ctx.beginPath();
+        ctx.moveTo(line.startX, line.startY);
+        ctx.lineTo(line.endX, line.endY);
+
+        // Проверка, наведена ли мышь на линию или её продолжение
+        const isNearLine = isMouseNearLine(line, mouseX, mouseY, 15); // Увеличим радиус активации
+        const isNearExtendedLine = isMouseNearExtendedLine(line, mouseX, mouseY, 15); // Проверка на продолжение линии
+
+        // Если мышь рядом с линией или её продолжением, начинаем анимацию увеличения
+        if (isNearLine || isNearExtendedLine) {
+            if (hoveredLine !== line) {
+                hoveredLine = line;
+                line.hoverProgress = 0; // Сброс прогресса увеличения для текущей линии
+                hoverDirection = 1; // Увеличиваем толщину
+            }
+
+            // Плавное увеличение толщины
+            line.hoverProgress = Math.min(line.hoverProgress + (1 / hoverDuration) * 16, 1); // 16 — это примерно 60 FPS
+        } else {
+            // Если мышь не рядом с линией, начинаем уменьшение толщины
+            if (hoveredLine === line) {
+                hoverDirection = -1; // Уменьшаем толщину
+            }
+
+            // Плавное уменьшение толщины
+            line.hoverProgress = Math.max(line.hoverProgress - (1 / fadeDuration) * 16, 0); // Плавно уменьшаем до 0
+        }
+
+        // Применяем эффект свечения и увеличиваем толщину
+        ctx.lineWidth = line.lineThickness * (1 + line.hoverProgress); // Увеличиваем толщину
+        ctx.shadowBlur = 15 * line.hoverProgress; // Увеличиваем эффект свечения
+        ctx.shadowColor = line.lineColor; // Цвет свечения такой же, как у линии
+
+        ctx.strokeStyle = line.lineColor;
+        ctx.stroke();
+        ctx.setLineDash([]); // Если были использованы пунктирные линии, сбрасываем
+
+        // Рисуем стрелку, если используется инструмент "стрелка"
+        if (line.tool === 'arrow') {
+            const angle = Math.atan2(line.endY - line.startY, line.endX - line.startX);
+            const arrowLength = 15;
+            const arrowAngle = Math.PI / 6;
+
+            ctx.beginPath();
+            ctx.moveTo(line.endX, line.endY);
+            ctx.lineTo(line.endX - arrowLength * Math.cos(angle - arrowAngle), line.endY - arrowLength * Math.sin(angle - arrowAngle));
+            ctx.moveTo(line.endX, line.endY);
+            ctx.lineTo(line.endX - arrowLength * Math.cos(angle + arrowAngle), line.endY - arrowLength * Math.sin(angle + arrowAngle));
+            ctx.stroke();
+        }
+    });
+}
+
+// Функция для проверки близости мыши к линии
+function isMouseNearLine(line, mouseX, mouseY, threshold = 15) {
+    // Вычисляем расстояние от точки (mouseX, mouseY) до линии
+    const distance = getDistanceFromPointToLine(line.startX, line.startY, line.endX, line.endY, mouseX, mouseY);
+    return distance <= threshold; // Возвращаем true, если расстояние меньше порога
+}
+
+// Функция для проверки близости мыши к продолжению линии
+function isMouseNearExtendedLine(line, mouseX, mouseY, threshold = 15) {
+    // Продолжаем линию в обе стороны (вперед и назад)
+    const extendedStartX = line.startX - (line.endX - line.startX);
+    const extendedStartY = line.startY - (line.endY - line.startY);
+    const extendedEndX = line.endX + (line.endX - line.startX);
+    const extendedEndY = line.endY + (line.endY - line.startY);
+
+    // Проверка расстояния до продолженной линии
+    const distance = getDistanceFromPointToLine(extendedStartX, extendedStartY, extendedEndX, extendedEndY, mouseX, mouseY);
+    return distance <= threshold; // Возвращаем true, если расстояние меньше порога
+}
+
+// Функция для вычисления перпендикулярного расстояния от точки до отрезка линии
+function getDistanceFromPointToLine(x1, y1, x2, y2, px, py) {
+    const A = px - x1;
+    const B = py - y1;
+    const C = x2 - x1;
+    const D = y2 - y1;
+
+    const dot = A * C + B * D;
+    const len_sq = C * C + D * D;
+    const param = len_sq !== 0 ? dot / len_sq : -1;
+
+    let closestX, closestY;
+    if (param < 0) {
+        closestX = x1;
+        closestY = y1;
+    } else if (param > 1) {
+        closestX = x2;
+        closestY = y2;
+    } else {
+        closestX = x1 + param * C;
+        closestY = y1 + param * D;
+    }
+
+    const dx = px - closestX;
+    const dy = py - closestY;
+    return Math.sqrt(dx * dx + dy * dy); // Возвращаем расстояние
+}
+
+
+
+document.getElementById('eraser').addEventListener('click', () => {
+    currentTool = 'eraser';
+});
+
+document.getElementById('line').addEventListener('click', () => {
+    currentTool = 'line';
+});
+
+document.getElementById('dashed').addEventListener('click', () => {
+    currentTool = 'dashed';
+});
+
+document.getElementById('arrow').addEventListener('click', () => {
+    currentTool = 'arrow';
+});
+
+document.getElementById('thickness').addEventListener('input', (e) => {
+    lineThickness = e.target.value;
+    document.getElementById('thicknessValue').innerText = lineThickness;
+});
+tools.classList.toggle('hidden'); 
+
+
+// Флаг для отслеживания состояния меню
+let isMenuOpen = false;
+
+// Обработчик для кнопки toggle
+toggleButton.addEventListener('click', () => {
+    // Переключаем класс hidden для панели инструментов
+    tools.classList.toggle('hidden');
+
+    // Обновляем флаг состояния меню
+    isMenuOpen = !tools.classList.contains('hidden');
+
+    // Изменяем текст на кнопке в зависимости от состояния
+    if (isMenuOpen) {
+        toggleButton.innerText = '—';
+    } else {
+        toggleButton.innerText = '+';
+    }
+});
+
+// Мышь нажатие (mousedown)
+canvas.addEventListener('mousedown', (e) => {
+    if (isMenuOpen) {
+        // Если меню открыто, можно рисовать
+        startDrawing(e);
+    } else {
+        // Если меню скрыто, можно двигать фишки
+        if (e.button === 0) { // Левая кнопка мыши
+            let foundPiece = null;
+            for (let i = pieces.length - 1; i >= 0; i--) { // Проверяем сверху вниз
+                if (isMouseOverPiece(e.offsetX, e.offsetY, pieces[i])) {
+                    foundPiece = pieces[i];
+                    break;
+                }
+            }
+            if (foundPiece) {
+                foundPiece.isDragging = true;
+            }
+        } else if (e.button === 2) {
+            isRightMouseDown = true;
+        }
+    }
+});
+
+// Мышь движение (mousemove)
+canvas.addEventListener('mousemove', (e) => {
+    mouseX = e.offsetX;
+    mouseY = e.offsetY;
+    if (isMenuOpen) {
+        // Если меню открыто, рисуем
+        if (isDrawing) {
+            if (currentTool === 'line') {
+                drawTemporaryLine(e);
+            } else if (currentTool === 'dashed') {
+                drawTemporaryDashedLine(e);
+            } else if (currentTool === 'arrow') {
+                drawTemporaryArrow(e);
+            } else if (currentTool === 'eraser') {
+                erase(e);
+            }
+        }
+    } else {
+        // Если меню скрыто, двигаем фишки
+        pieces.forEach(piece => {
+            if (piece.isDragging) {
+                const prevX = piece.x;
+                const prevY = piece.y;
+
+                piece.x = e.offsetX;
+                piece.y = e.offsetY;
+
+                if (isRightMouseDown) {
+                    const distance = Math.hypot(piece.x - prevX, piece.y - prevY);
+                    const steps = Math.ceil(distance / 5); // Adjust trail smoothness
+
+                    for (let i = 1; i <= steps; i++) {
+                        const interpolatedX = prevX + (piece.x - prevX) * (i / steps);
+                        const interpolatedY = prevY + (piece.y - prevY) * (i / steps);
+                        piece.trails.push({ x: interpolatedX, y: interpolatedY, color: piece.color });
+                    }
+                    lastTrailAction.push({ piece, newTrails: [{ x: piece.x, y: piece.y, color: piece.color }] });
+                }
+            }
+        });
+    }
+    draw(); // Redraw the canvas after moving or drawing
+});
+
+// Мышь отпускание (mouseup)
+canvas.addEventListener('mouseup', (e) => {
+    if (e.button === 0) {
+        if (isMenuOpen) {
+            // Если меню открыто, рисуем
+            stopDrawing(e);
+        } else {
+            // Если меню скрыто, останавливаем движение фишек
+            pieces.forEach(piece => {
+                piece.isDragging = false; // Stop dragging for all pieces on mouse up
+            });
+        }
+    } else if (e.button === 2) {
+        isRightMouseDown = false;
+    }
+});
+
+// Мышь выход из области (mouseout)
+canvas.addEventListener('mouseout', stopDrawing);
+
+// Мышь выход за пределы (mouseleave)
+canvas.addEventListener('mouseleave', stopDrawing);  
+
 
         createBackgroundButtons();
         draw();
