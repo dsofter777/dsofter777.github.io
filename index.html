@@ -736,7 +736,9 @@
         ctx.clearRect(backgroundImage, 0, 0, canvas.width, canvas.height);
         ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
         redrawAllLines();
-    // Сначала рисуем следы
+   // Сначала рисуем следы без тени
+    ctx.shadowColor = 'transparent';  // Отключаем тень для следов
+
     pieces.forEach(piece => {
         // Рисуем следы без тени
         piece.trails.forEach(trail => {
@@ -1255,7 +1257,7 @@ canvas.addEventListener('mousemove', (e) => {
 
                 if (isRightMouseDown) {
                     const distance = Math.hypot(piece.x - prevX, piece.y - prevY);
-                    const steps = Math.ceil(distance / 5); // Adjust trail smoothness
+                    const steps = Math.ceil(distance); // Adjust trail smoothness
 
                     for (let i = 1; i <= steps; i++) {
                         const interpolatedX = prevX + (piece.x - prevX) * (i / steps);
