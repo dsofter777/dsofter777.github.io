@@ -7,6 +7,7 @@
     <link rel="icon" type="image/png" href="icon.png">
     <!-- Подключаем шрифт Exo 2 из Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core/index.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
@@ -21,6 +22,9 @@
             display: block;
             width: 100vw;
             height: 100vh;
+            z-index: 0;
+            position: absolute;
+
         }
         #controls {
             width: 250px;
@@ -132,6 +136,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            z-index: 9999;
         }
 
         .tool-button {
@@ -171,6 +176,7 @@
             display: flex;
             justify-content: flex-end; /* Позиционирование кнопки справа */
             width: 100%;
+
         }
 
         #lineThickness {
@@ -308,11 +314,130 @@
                 box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.2);  /* Свечение при нормальном размере */
             }
         }
+        /* Стиль для кнопки планеты */
+        #planet-button {
+            width: 50px;
+            height: 50px;
+            background-color: transparent;
+            color: white;
+            border: 2px solid #ffffff; /* Белая рамка */
+            border-radius: 50%;
+            font-size: 25px;
+            cursor: pointer;
+            text-align: center;
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.8); /* Эффект свечения */
+            transition: all 0.3s ease; /* Анимация */
+            z-index: 1;
+        }
+
+        #planet-button:hover {
+            box-shadow: 0 0 20px rgba(0, 255, 255, 1); /* Сильное свечение при наведении */
+            transform: scale(1.1); /* Легкое увеличение кнопки */
+
+        }
+
+
+         /* Стиль для кнопки фотоаппарата */
+            .photo-button {
+                width: 50px;
+                height: 50px;
+                background-color: transparent;
+                color: white;
+                border: 2px solid #ffffff;
+                border-radius: 50%;
+                font-size: 20px;
+                cursor: pointer;
+                display: inline-block;
+                position: absolute;
+                box-shadow: 0 0 10px rgba(255, 255, 255, 0.8); /* Белое свечение */
+                transition: all 0.3s ease;
+
+                /* Центрирование кнопки */
+                top: 50%;  
+                left: 50%; 
+                transform: translate(-50%, -50%); 
+                z-index: 1;
+            }
+
+            /* Подсветка кнопки при наведении */
+            .photo-button:hover {
+                box-shadow: 0 0 20px rgba(255, 0, 0, 1); /* Розовое свечение при наведении */
+                transform: scale(1.1) translate(-50%, -50%); /* Увеличение при наведении с учётом центровки */
+            }
+
+            /* Стиль для иконки фотоаппарата */
+            .photo-button i {
+                font-size: 32px;
+                color: #FFA500; /* Розовый цвет для иконки */
+            }
+
+
+
+                /* Стили для контейнера с панорамой */
+                #viewer {
+                    width: 100vw;
+                    height: 100vh;
+                    position: relative;
+                }
+
+                /* Стили для кнопки */
+                #close-btn {
+                    position: absolute;
+                    top: 20px;
+                    right: 20px;
+                    background-color: transparent; /* Прозрачный фон */
+                    color: black; /* Черный текст */
+                    border: 2px solid black; /* Черная рамка */
+                    padding: 8px 16px; /* Уменьшенный размер */
+                    font-size: 18px; /* Размер текста */
+                    font-weight: bold; /* Жирный шрифт */
+                    border-radius: 50%; /* Круглая форма */
+                    cursor: pointer;
+                    z-index: 9999;
+                    transition: all 0.3s ease; /* Плавный переход для всех эффектов */
+                    line-height: 1; /* Убираем лишние отступы */
+                    box-shadow: 0 0 8px 2px rgba(255, 255, 255, 0.8); /* Эффект свечения */
+                }
+
+                /* Эффекты при наведении */
+                #close-btn:hover {
+                    color: white; /* Белый текст */
+                    border-color: white; /* Белая рамка */
+                    transform: scale(1.1); /* Легкое увеличение кнопки */
+                    box-shadow: 0 0 15px 4px rgba(255, 255, 255, 1); /* Увеличенное свечение при наведении */
+                }
+
+                 .coordinates {
+                    position: absolute;
+                    top: 20px;
+                    left: 20px;
+                    background-color: rgba(0, 0, 0, 0.5);
+                    color: white;
+                    padding: 10px;
+                    border-radius: 5px;
+                    font-size: 16px;
+                    z-index: 1;
+                }
+
 
 
     </style>
+
 </head>
 <body>
+ 
+    <!-- Кнопка закрытия -->
+    <button id="close-btn">X</button>
+
+    <!-- Кнопка "Планета" для отображения/скрытия фотоаппаратов -->
+    <button id="planet-button"><i class="fa-solid fa-earth-americas"></i></button>
+
+    <!-- Контейнер для кнопок фотоаппаратов -->
+    <div class="button-container" id="button-container"></div>
+
     <button id="menuToggle">☰</button> <!-- Кнопка для открытия/закрытия меню -->
     <!-- Контейнер для панели инструментов с кнопкой справа -->
     <div id="tools-container">
@@ -351,9 +476,957 @@
         <div id="nameInputs"></div>
         <div id="backgroundButtons"></div>
     </div>
-
+        <!-- Контейнер для панорамы -->
+    <div id="viewer"></div>
     <canvas id="gameCanvas"></canvas>
     <div id="skinMenu"></div> <!-- Меню для выбора скинов -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three/build/three.module.js",
+                "@photo-sphere-viewer/core": "https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core/index.module.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+
+        const backgrounds = {
+            'СТРОЙКА БИЗВАР.jpg': {
+                count: 22,
+                positions: [
+                    { top: 255, left: 165 },//вертикалка
+                    { top: 270, left: 250 },//кран
+                    { top: 235, left: 330 },//киллор
+                    { top: 170, left: 370 },//трубы
+                    { top: 160, left: 470 },//верхний бассейн
+                    { top: 70, left: 500 },//шорт
+                    { top: 160, left: 840 },//трубы атака
+                    { top: 300, left: 950 },//сиськи
+                    { top: 600, left: 950 },//сиська
+                    { top: 450, left: 870 },//респ атаки
+                    { top: 600, left: 570 },//колизей
+                    { top: 320, left: 680 },//барханы
+                    { top: 420, left: 650 },//центр басейн
+                    { top: 800, left: 570 },//дальний бассейн
+                    { top: 850, left: 400 },//колодец
+                    { top: 390, left: 165 },//респ деф
+                    { top: 450, left: 250 },//змейка
+                    { top: 590, left: 165 },//лг деф
+                    { top: 710, left: 165 },//пристройка
+                    { top: 670, left: 365 },//нижние плиты
+                    { top: 390, left: 435 },//центр плиты
+                    { top: 270, left: 500 },//яма хг
+                ],
+                images: [
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/стройка-бизвар-вертикалка.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/стройка-бизвар-кран.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/стройка-бизвар-киллор.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/стройка-бизвар-трубы.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/стройка-бизвар-верхний-бассейн.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/стройка-бизвар-шорт.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/стройка-бизвар-трубы-атака.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/стройка-бизвар-сиськи.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/стройка-бизвар-сиська.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/стройка-бизвар-респ-атака.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/стройка-бизвар-колизей.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/стройка-бизвар-барханы.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/стройка-бизвар-центр-бассейн.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/стройка-бизвар-дальний-бассейн.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/стройка-бизвар-колодец.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/стройка-бизвар-респ-деф.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/стройка-бизвар-змейка.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/стройка-бизвар-лг-деф.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/стройка-бизвар-пристройка.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/стройка-бизвар-нижние-плиты.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/стройка-бизвар-центр-плиты.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/стройка-бизвар-яма-хг.jpg',
+                ]
+            },
+            'КИНОСТУДИЯ.jpg': {
+                count: 24,
+                positions: [
+                    { top: 390, left: 150 },//респ дэфа
+                    { top: 390, left: 230 },//зеленка
+                    { top: 270, left: 260 },//шорт левая надпись
+                    { top: 190, left: 400 },//шорт правая надпись
+                    { top: 180, left: 290 },//карман
+                    { top: 280, left: 430 },//кишка
+                    { top: 420, left: 350 },//фонтан - балкон
+                    { top: 570, left: 290 },//узкий
+                    { top: 500, left: 370 },//широкий
+                    { top: 690, left: 170 },//нычка
+                    { top: 800, left: 210 },//шоссе
+                    { top: 892, left: 340 },//тарелки
+                    { top: 912, left: 458 },//тупик тарелки
+                    { top: 724, left: 427 },//электрики
+                    { top: 661, left: 356 },//мид лево
+                    { top: 582, left: 443 },//мид центр
+                    { top: 518, left: 529 },//мид право
+                    { top: 833, left: 600 },//лонг лево
+                    { top: 755, left: 740 },//лонг право
+                    { top: 300, left: 554 },//дроп
+                    { top: 336, left: 766 },//бругер
+                    { top: 170, left: 720 },//бассейн
+                    { top: 240, left: 805 },//хотдог
+                    { top: 423, left: 900 },//респ атаки
+                ],
+                images: [
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кино-респа-дефа.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кино-зеленка.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кино-шорт-низ.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кино-шорт-верх.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кино-карман.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кино-кишка.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кино-фонтан.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кино-узкий.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кино-широкий.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кино-нычка.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кино-шоссе.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кино-тарелки.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кино-тупик-тарелки.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кино-электрики.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кино-мид-низ.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кино-мид-центр.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кино-мид-верх.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кино-лонг-низ.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кино-верх.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кино-дроп.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кино-бургер.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кино-бассейн.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кино-хотдог.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кино-респ-атаки.jpg',
+                ]
+            },
+            'МУРАВА.png': {
+                count: 5,
+                positions: [
+                    { top: 466, left: 264 },//между 1-3
+                    { top: 355, left: 509 },//между 3-6
+                    { top: 434, left: 759 },//между 6-9
+                    { top: 746, left: 892 },//между 7-9
+                    { top: 794, left: 80 },//между 1-4
+                    
+                ],
+                images: [
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мурава-между1-3.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мурава-между-3-6.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мурава-между-6-9.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мурава-между-9-7.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мурава-между-1-4.jpg',
+                ]
+            },
+            'ДИНОЗАВРИК.png': {
+                count: 8,
+                positions: [
+                    { top: 430, left: 75 },//защита
+                    { top: 650, left: 870 },//атака
+                    { top: 911, left: 668 },//между камнями леп вышка
+                    { top: 825, left: 267 },//между 7-5
+                    { top: 530, left: 293 },//между 8-7-5 внутри
+                    { top: 300, left: 500 },//6-4-3 внутри
+                    { top: 510, left: 650 },//3-2-1 внутри
+                    { top: 442, left: 864 },//2-1 снаружи тупик дороги 
+                ],
+                images: [
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/дино-защита.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/дино-атака.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/дино-камень-леп.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/дино-снаружи-8-7-5.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/дино-8-7-5.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/дино-внутри-6-4-3.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/дино-внутри-3-2-1.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/дино-бочка-красная-2-1.jpg',
+                ]
+            },
+            'БОЛЬШИЕ КОНТЫ.png': {
+                count: 4,
+                positions: [
+                    { top: 355, left: 240 },//середина
+                    { top: 440, left: 590 },//атака
+                    { top: 760, left: 122 },//деф
+                    { top: 246, left: 450 },//на голове красный
+                ],
+                images: [
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/большие-конты-середина.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/большие-конты-респ-атака.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/большие-конты-респ-защита.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/большие-конты-на-голове.jpg',
+                ]
+            },
+            'БЛАДСЫ.png': {
+                count: 7,
+                positions: [
+                    { top: 325, left: 877 },//атака
+                    { top: 737, left: 160 },//деф
+                    { top: 533, left: 524 },//центр
+                    { top: 360, left: 330 },//верх левый теплица
+                    { top: 360, left: 700 },//верх правая теплица
+                    { top: 715, left: 330 },//низ левый теплица
+                    { top: 721, left: 700 },//низ правая теплица  
+                ],
+                images: [
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/бладсы-атака.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/бладсы-защита.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/бладсы-центр.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/бладсы-теплица-верх-лево.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/бладсы-верх-правая-теплица.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/бладсы-теплица-низ-лево.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/бладсы-теплица-низ-право.jpg',
+                ]
+            },
+            'ГРЕЙПСИД.png': {
+                count: 8,
+                positions: [
+                    { top: 118, left: 331 },//защита
+                    { top: 840, left: 680 },//атака
+                    { top: 490, left: 470 },//центр дороги
+                    { top: 254, left: 660 },//проход вверх
+                    { top: 709, left: 386 },//проход низ
+                    { top: 237, left: 507 },//крыша защиты
+                    { top: 715, left: 501 },//крыша атаки
+                    { top: 95, left: 853 },//красный конт 
+                ],
+                images: [
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/грейпсид-респ-защита.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/грейпсид-атака.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/грейпсид-дорога.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/грейпсид-в-проходе-защита.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/грейпсид-в-проходе-низ.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/грейпсид-крыша-защиты.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/грейпсид-крыша-атаки.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/грейпсид-красный-конт.jpg',
+                ]
+            },
+            'ЗЕРНО.png': {
+                count: 11,
+                positions: [
+                    { top: 592, left: 62 },//атака 
+                    { top: 592, left: 943 },//защита
+                    { top: 766, left: 220 },//вагоны атака
+                    { top: 766, left: 616 },//вагоны деф
+                    { top: 715, left: 396 },//лонг атака
+                    { top: 600, left: 257 },//бочки атака
+                    { top: 611, left: 396 },//кишка мид
+                    { top: 490, left: 370 },//крыша мид
+                    { top: 490, left: 171 },//крыши атаки
+                    { top: 340, left: 460 },//лонг деф
+                    { top: 266, left: 450 },//дорога 
+                ],
+                images: [
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/зерно-атака.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/зерно-защита.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/зерно-вагоны-атака.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/зерно-вагоны-деф.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/зерно-лонг-атака.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/зерно-бочки-атаки.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/зерно-кишка-мид.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/зерно-крыша-мид.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/зерно-крыша-атаки.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/зерно-лонг-деф.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/зерно-дорога.jpg',
+                ]
+            },
+            'КАЙО ПЕРИКО.png': {
+                count: 12,
+                positions: [
+                    { top: 113, left: 800 },//атака
+                    { top: 620, left: 115 },//защита
+                    { top: 177, left: 177 },//желтый кран
+                    { top: 297, left: 281 },//кусты защита
+                    { top: 387, left: 287 },//навес 1
+                    { top: 790, left: 230 },//кран защита
+                    { top: 536, left: 162 },//крыша защиты
+                    { top: 720, left: 802 },//бочки
+                    { top: 422, left: 790 },//желтый кран справа
+                    { top: 222, left: 534 },//лодка
+                    { top: 86, left: 604 },//крыша атаки 
+                ],
+                images: [
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кайо-атака.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кайо-защита.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кайо-желтый-кран.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кайо-кусты-защита.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кайо-навес-1.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кайо-кран-защита.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кайо-крыша-защита.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кайо-бочки.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кайо-желтый-справа.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кайо-лодка.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/кайо-крыша-атаки.jpg',
+                ]
+            },
+            'ТЕПЛИЦЫ.png': {
+                count: 8,
+                positions: [
+                    { top: 380, left: 881 },//атака
+                    { top: 535, left: 141 },//защита
+                    { top: 444, left: 494 },//промокод
+                    { top: 492, left: 219 },//навес
+                    { top: 439, left: 305 },//дом защиты
+                    { top: 737, left: 484 },//мэйн дом
+                    { top: 644, left: 633 },//прицеп
+                    { top: 535, left: 819 },//дом-атака
+                ],
+                images: [
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/теплицы-атака.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/теплицы-защита.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/теплицы-промокод.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/теплицы-навес.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/теплицы-дом-защиты.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/теплицы-мейн-дом.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/теплицы-прицеп.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/теплицы-дом-атака.jpg',
+
+                ]
+            },
+            'КВАДРИКИ.png': {
+                count: 6,
+                positions: [
+                    { top: 218, left: 939 },//атака
+                    { top: 607, left: 41 },//защита
+                    { top: 388, left: 350 },//мейн крыша
+                    { top: 557, left: 495 },//промокод
+                    { top: 729, left: 425 },//реклама
+                    { top: 465, left: 563 },//навес   
+                ],
+                images: [
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/квадрики-атака.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/квадрики-защита.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/квадрики-мейн-крыша.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/квадрики-промокод.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/квадрики-реклама.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/квадрики-навес.jpg',
+                ]
+            },
+            'ЛЕСОПИЛКА.png': {
+                count: 20,
+                positions: [
+                    { top: 900, left: 80 },//атака
+                    { top: 250, left: 750 },//защита
+                    { top: 653, left: 68 },//лг атаки
+                    { top: 640, left: 353 },//под досками
+                    { top: 940, left: 235 },//жд
+                    { top: 766, left: 355 },//доски
+                    { top: 894, left: 438 },//ячейки
+                    { top: 745, left: 608 },//будка конвеер
+                    { top: 325, left: 270 },//песок
+                    { top: 338, left: 454 },//под заводом
+                    { top: 740, left: 680 },//конвеер
+                    { top: 560, left: 620 },//лг конвеер
+                    { top: 733, left: 780 },//танцпол
+                    { top: 750, left: 950 },//верхние бревна
+                    { top: 520, left: 800 },//средние бревна
+                    { top: 350, left: 824 },//нижние бревна
+                    { top: 116, left: 670 },//лг деф
+                    { top: 84, left: 546 },//прицепы
+                    { top: 112, left: 430 },//лг курятник
+                    { top: 171, left: 559 },//курятник  
+                ],
+                images: [
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лес-спавн-атаки.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лес-спавн-дефа.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лес-лг-атаки.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лес-под-досками.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лес-жд.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лес-доски.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лес-ячейки.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лес-будка-конвеер.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лес-песок.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лес-под-заводом.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лес-конвеер.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лес-лг-конвеер.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лес-танцпол.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лес-верхние-бревна.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лес-средние-бревна.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лес-нижние-бревна.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лес-лг-деф.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лес-прицепы.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лес-лг-курятник.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лес-курятник.jpg',
+                ]
+            },
+            'ЛНС.png': {
+                count: 14,
+                positions: [
+                    { top: 460, left: 190 },//атака
+                    { top: 460, left: 855 },//защита
+                    { top: 175, left: 220 },//кьюшка
+                    { top: 55, left: 280 },//угол
+                    { top: 350, left: 440 },//трубы
+                    { top: 530, left: 420 },//прицепы
+                    { top: 613, left: 256 },//синий конт
+                    { top: 690, left: 180 },//бревна
+                    { top: 813, left: 296 },//крас син крас конты
+                    { top: 808, left: 690 },//конты на углу
+                    { top: 967, left: 816 },//лг
+                    { top: 580, left: 645 },//центр
+                    { top: 230, left: 708 },//крыша
+                    { top: 143, left: 552 },//бочка  
+                ],
+                images: [
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лнс-респ-атаки.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лнс-респ-защита.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лнс-кьюшка.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лнс-угол.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лнс-трубы.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лнс-прицепы.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лнс-синий-конт.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лнс-бревна.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лнс-к-с-к-конт.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лнс-конты-на-углу.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лнс-лг.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лнс-центр.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лнс-крыша.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/лнс-бочка.jpg',
+                ]
+            },
+            'МАЛЫЕ КОНТЫ.png': {
+                count: 6,
+                positions: [
+                    { top: 267, left: 152 },//атака
+                    { top: 939, left: 411 },//защита
+                    { top: 773, left: 301 },//кишка2 низ имаг
+                    { top: 631, left: 572 },//коридор1
+                    { top: 714, left: 353 },//коридор3
+                    { top: 219, left: 627 },//на голове
+                ],
+                images: [
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/малые-респ-атаки.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/малые-респ-защита.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/малые-кишка-2.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/малые-коридор-1.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/малые-коридор-3.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/малые-на-голове.jpg',
+                ]
+            },
+            'МЕКСЫ.png': {
+                count: 12,
+                positions: [
+                    { top: 596, left: 131 },//атака
+                    { top: 470, left: 817 },//защита
+                    { top: 303, left: 250 },//лгшка
+                    { top: 270, left: 512 },//загоны
+                    { top: 580, left: 366 },//крыша атаки
+                    { top: 511, left: 572 },//между
+                    { top: 410, left: 680 },//сиськи
+                    { top: 560, left: 739 },//прицепы
+                    { top: 329, left: 747 },//желтый прицеп
+                    { top: 332, left: 814 },//навес
+                    { top: 816, left: 890 },//будка
+                    { top: 625, left: 941 },//будка респа
+ 
+                ],
+                images: [
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мексы-респ-атака.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мексы-респ-защита.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мексы-лгшка.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мексы-загоны.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мексы-крыша-атаки.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мексы-между.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мексы-сиськи.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мексы-прицепы.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мексы-желтый-прицеп.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мексы-навес.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мексы-будка.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мексы-будка-респа.jpg',
+                ]
+            },
+            'МИРОР.png': {
+                count: 13,
+                positions: [
+                    { top: 825, left: 217 },//атака
+                    { top: 124, left: 722 },//защита
+                    { top: 505, left: 342 },//центр
+                    { top: 746, left: 320 },//1
+                    { top: 737, left: 424 },//2
+                    { top: 765, left: 522 },//3
+                    { top: 762, left: 670 },//4
+                    { top: 579, left: 756 },//5
+                    { top: 337, left: 709 },//6
+                    { top: 267, left: 582 },//7
+                    { top: 285, left: 468 },//8
+                    { top: 278, left: 351 },//9
+                    { top: 293, left: 242 },//10
+ 
+                ],
+                images: [
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мирор-атака.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мирор-защита.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мирор-центр.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мирор-1.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мирор-2.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мирор-3.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мирор-4.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мирор-5.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мирор-6.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мирор-7.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мирор-8.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мирор-9.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мирор-10.jpg',
+                ]
+            },
+            'МУСОР.png': {
+                count: 12,
+                positions: [
+                    { top: 766, left: 635 },//атака
+                    { top: 148, left: 482 },//защита
+                    { top: 197, left: 373 },//между защита
+                    { top: 218, left: 508 },//конт мусорка
+                    { top: 145, left: 600 },//буст крыши на углу
+                    { top: 326, left: 480 },//навес
+                    { top: 380, left: 746 },//ангар атаки
+                    { top: 866, left: 528 },//конт на мейн крышу
+                    { top: 848, left: 226 },//мейн крыша
+                    { top: 630, left: 270 },//спуск между
+                    { top: 530, left: 267 },//между
+                    { top: 402, left: 308 },//центральная крыша
+                ],
+                images: [
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мусор-респ-атаки.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мусор-респ-защита.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мусор-между-защита.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мусор-конт-мусорка.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мусор-буст-крыши-на-углу.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мусор-навес.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мусор-ангар-атаки.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мусор-конт-на-мейн-крышу.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мусор-мейн-крыша.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мусор-спуск-между.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мусор-между.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мусор-центр-крыша.jpg',
+                ]
+            },
+            'МЯСО.png': {
+                count: 9,
+                positions: [
+                    { top: 753, left: 211 },//атака
+                    { top: 275, left: 876 },//защита
+                    { top: 292, left: 777 },//буст защ
+                    { top: 660, left: 277 },//проход в ангар атк
+                    { top: 807, left: 947 },//крыша респа
+                    { top: 537, left: 895 },//проход в ангар защ
+                    { top: 658, left: 671 },//буст атк
+                    { top: 320, left: 500 },//на крыше
+                    { top: 259, left: 522 },//на стеклах улица               
+                ],
+                images: [
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мясо-атака.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мясо-деф.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мясо-буст-деф.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мясо-проход-в-ангар-атк.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мясо-крыша-респа.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мясо-проход-в-ангар-защ.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мясо-буст-атк.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мясо-на-крыше.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/мясо-на-стеклах-улица.jpg',
+                ]
+            },
+            'НГ.png': {
+                count: 13,
+                positions: [
+                    { top: 467, left: 168 },//атака
+                    { top: 400, left: 800 },//защита
+                    { top: 316, left: 154 },//хг
+                    { top: 385, left: 300 },//дом атаки
+                    { top: 408, left: 527 },//дом между
+                    { top: 579, left: 599 },//туалеты
+                    { top: 408, left: 706 },//дом защиты
+                    { top: 140, left: 556 },//сарай
+                    { top: 17, left: 338 },//камень
+                    { top: 850, left: 260 },//сарай на углу
+                    { top: 960, left: 325 },//лг под сараем
+                    { top: 818, left: 510 },//сарай лгшка длинный
+                    { top: 780, left: 675 },//сарай лгшка малый
+                    
+                ],
+                images: [
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/нг-атака.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/нг-сторона-защиты.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/нг-хг.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/нг-дом-атаки.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/нг-дом-между.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/нг-туалеты.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/нг-дом-защиты.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/нг-сарай.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/нг-камень.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/нг-сарай-на-углу.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/нг-лг-под-сараем.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/нг-сарай-лгшка-длинный.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/нг-сарай-лгшка-малый.jpg',
+                ]
+            },
+            'НЕФТЬ.png': {
+                count: 11,
+                positions: [
+                    { top: 585, left: 177 },//атака
+                    { top: 520, left: 920 },//защита
+                    { top: 262, left: 334 },//сиска 1
+                    { top: 440, left: 800 },//сиска 2
+                    { top: 690, left: 250 },//ангар атака
+                    { top: 876, left: 370 },//вдоль хг
+                    { top: 800, left: 520 },//крыша хг
+                    { top: 877, left: 735 },//зеленый конт
+                    { top: 665, left: 517 },//свалка
+                    { top: 322, left: 500 },//мэйн крыша
+                    { top: 200, left: 610 },//вдоль мейн ангара
+                    
+                ],
+                images: [
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/нефть-атака.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/нефть-защита.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/нефть-сиська-1.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/нефть-сиська-2.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/нефть-ангар-атака.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/нефть-вдоль-хг.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/нефть-крыша-хг.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/нефть-зеленый-конт.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/нефть-свалка.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/нефть-мейн-крыша.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/нефть-вдоль-мейн-ангара.jpg',
+                    
+
+                ]
+            },
+            'ОГРАБЫ.png': {
+                count: 16,
+                positions: [
+                    { top: 720, left: 130 },//атака
+                    { top: 388, left: 932 },//защита
+                    { top: 667, left: 210 },//крыша атаки
+                    { top: 818, left: 260 },//камень респа
+                    { top: 644, left: 332 },//палатка 1
+                    { top: 530, left: 424 },//палатка 2
+                    { top: 444, left: 255 },//навес
+                    { top: 335, left: 348 },//вдоль забора
+                    { top: 164, left: 483 },//нычка
+                    { top: 37, left: 809 },//жд
+                    { top: 612, left: 491 },//траншея
+                    { top: 780, left: 500 },//камень хг
+                    { top: 681, left: 691 },//будка
+                    { top: 611, left: 769 },//дом защиты
+                    { top: 610, left: 898 },//трейлер
+                    { top: 460, left: 883 },//ангар
+                    
+                ],
+                images: [
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/ограбы-респ-атака.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/ограбы-защита.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/ограбы-крыша-атака.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/ограбы-камень-респа.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/ограбы-палатка-1.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/ограбы-палатка-2.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/ограбы-навес.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/ограбы-вдоль-забора.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/ограбы-нычка.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/ограбы-жд.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/ограбы-траншея.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/ограбы-камень-хг.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/ограбы-будка.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/ограбы-дом-защиты.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/ограбы-трейлер.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/ограбы-ангар.jpg',
+                ]
+            },
+            'ПОЕЗДА.png': {
+                count: 9,
+                positions: [
+                    { top: 175, left: 810 },//атака
+                    { top: 785, left: 137 },//защита
+                    { top: 600, left: 127 },//буст на конт
+                    { top: 686, left: 336 },//1 линия защ
+                    { top: 741, left: 380 },//электрики защ
+                    { top: 860, left: 920 },//синий конт респа
+                    { top: 470, left: 482 },//между
+                    { top: 256, left: 580 },//1 линия атк
+                    { top: 202, left: 478 },//электрики атк
+                    
+                ],
+                images: [
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/поезда-респ-атака.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/поезда-респ-защиты.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/поезда-буст-на-конт.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/поезда-1-линия-деф.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/поезда-электрики-защ.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/поезда-синий-конт-респа.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/поезда-между.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/поезда-1-линия-атк.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/поезда-электрики-атк.jpg',
+
+                ]
+            },
+            'САМОЛЕТЫ.png': {
+                count: 20,
+                positions: [
+                    { top: 747, left: 705 },//атака
+                    { top: 260, left: 230 },//защита
+                    { top: 126, left: 229 },//крыша защиты
+                    { top: 37, left: 277 },//лгшка
+                    { top: 140, left: 327 },//буст
+                    { top: 358, left: 301 },//центр конты
+                    { top: 392, left: 179 },//конты защ
+                    { top: 574, left: 334 },//кабина
+                    { top: 636, left: 365 },//корпус центр
+                    { top: 619, left: 230 },//хвост
+                    { top: 835, left: 211 },//хвост на углу
+                    { top: 863, left: 370 },//корпус синий
+                    { top: 868, left: 510 },//кабина забор
+                    { top: 860, left: 611 },//красные конты
+                    { top: 630, left: 680 },//крыша спавн
+                    { top: 515, left: 600 },//центральные ворота
+                    { top: 460, left: 474 },//автобусы
+                    { top: 417, left: 801 },//треллер
+                    { top: 234, left: 685 },//мейн ангар
+                    { top: 469, left: 124 },//за забором
+                    
+                ],
+                images: [
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/самолеты-респ-атаки.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/самолеты-респ-защита.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/самолеты-крыша-защиты.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/самолеты-лгшка.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/самолеты-буст.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/самолеты-центр-конты.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/самолеты-конты-защиты.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/самолеты-кабина.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/самолеты-корпус-центр.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/самолеты-хвост.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/самолеты-хвост-на-углу.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/самолеты-корпус-синий.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/самолеты-кабина-забор.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/самолеты-красные-конты.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/самолеты-крыша-спавн.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/самолеты-цетральные-ворота.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/самолеты-автобусы.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/самолеты-треллер.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/самолеты-мейн-ангар.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/самолеты-за-забором.jpg',
+                ]
+            },
+            'ДЕРЕВНЯ БАЙКЕРОВ.png': {
+                count: 7,
+                positions: [
+                    { top: 820, left: 260 },//атака
+                    { top: 48, left: 680 },//защита
+                    { top: 645, left: 566 },//сцена
+                    { top: 522, left: 586 },//центр
+                    { top: 488, left: 437 },//развалины центр
+                    { top: 325, left: 287 },//автобус
+                    { top: 237, left: 252 },//развалины
+                    
+                ],
+                images: [
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/байкеры-атака.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/байкеры-защита.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/байкеры-сцена.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/байкеры-центр.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/байкеры-развалины-центр.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/байкеры-автобусы.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/байкеры-развалины.jpg',
+                ]
+            },
+            'СТРОЙКА.png': {
+                count: 5,
+                positions: [
+                    { top: 826, left: 283 },//атака
+                    { top: 511, left: 845 },//защита
+                    { top: 660, left: 361 },//1 пролет
+                    { top: 660, left: 554 },//2 пролет
+                    { top: 660, left: 759 },//3 пролет
+                    
+                    
+                ],
+                images: [
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/стройка-атака.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/стройка-защита.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/стройка-левоцентр.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/стройка-центр.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/стройка-право.jpg',
+                ]
+            },
+            'ТШКА.png': {
+                count: 10,
+                positions: [
+                    { top: 827, left: 897 },//атака
+                    { top: 164, left: 63 },//защита
+                    { top: 121, left: 336 },//красные конты
+                    { top: 186, left: 447 },//мусорка
+                    { top: 539, left: 439 },//дорога
+                    { top: 311, left: 493 },//мейн дом
+                    { top: 779, left: 471 },//трубы
+                    { top: 765, left: 637 },//крыша атаки
+                    { top: 782, left: 800 },//дом атаки
+                    { top: 212, left: 200 },//дом защиты
+                    
+                    
+                ],
+                images: [
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/тшка-атака.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/тшка-защита.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/тшка-красные-конты.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/тшка-мусорка.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/тшка-дорога.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/тшка-мейн-дом.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/тшка-трубы.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/тшка-крыша-атаки.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/тшка-дом-атаки.jpg',
+                    'https://raw.githubusercontent.com/dsofter777/dsofter777.github.io/main/тшка-дом-защиты.jpg',
+                ]
+            }
+        };
+        
+        let currentIndex = 0;
+        
+        import { Viewer } from '@photo-sphere-viewer/core';
+        let viewer;
+
+        // Получаем элементы
+        const planetButton = document.getElementById('planet-button');
+        const buttonContainer = document.getElementById('button-container');
+        const closeButton = document.getElementById('close-btn');
+        closeButton.style.display = 'none';
+
+         // Функция для добавления кнопок фотоаппаратов
+        function addButtons(cameraCount, positions, images) {
+            // Очищаем контейнер перед добавлением новых кнопок
+            buttonContainer.innerHTML = '';
+
+            // Получаем размеры фона (они будут динамически меняться)
+            const backgroundWidth = document.body.offsetWidth;
+            const backgroundHeight = document.body.offsetHeight;
+
+            // Если для фона задано одно изображение
+            if (images.length === 1) {
+                // Создаем кнопки с этим изображением для всех позиций
+                for (let i = 0; i < cameraCount; i++) {
+                    createCameraButton(i, positions, images[0]);
+                }
+            } else {
+                // Если для фона несколько изображений, используем их по очереди
+                for (let i = 0; i < cameraCount; i++) {
+                    createCameraButton(i, positions, images[i]);
+                }
+            }
+        }
+
+        // Функция для создания кнопки фотоаппарата
+        function createCameraButton(i, positions, imageSrc) {
+            const button = document.createElement('button');
+            button.classList.add('photo-button');
+            button.innerHTML = '<i class="fa-solid fa-person"></i>'; // Иконка фотоаппарата
+            button.setAttribute('data-index', i); // Устанавливаем атрибут с индексом изображения
+
+            // Получаем размеры фона
+            const backgroundWidth = document.body.offsetWidth;
+            const backgroundHeight = document.body.offsetHeight;
+
+            // Применяем уникальную позицию
+            const top = (positions[i].top / 1000) * backgroundHeight;
+            const left = (positions[i].left / 1000) * backgroundWidth;
+
+            button.style.position = 'absolute';
+            button.style.top = `${top}px`;
+            button.style.left = `${left}px`;
+
+            // Связываем каждую кнопку с изображением
+            button.setAttribute('data-image', imageSrc);
+
+            // Добавляем кнопку в контейнер
+            buttonContainer.appendChild(button);
+
+            // Добавляем обработчик клика по кнопке фотоаппарата
+            button.addEventListener('click', function () {
+                const imageSrc = button.getAttribute('data-image');
+                showPanorama(imageSrc); // Показываем панораму
+            });
+        }
+
+        // Функция для отображения панорамы
+        function showPanorama(imageSrc) {
+            // Скрываем кнопки фотоаппаратов и кнопку планеты
+            buttonContainer.style.display = 'none';
+            planetButton.style.display = 'none';
+            toggleButton.style.display = 'none';
+            menuToggle.style.display = 'none';
+            closeButton.style.zIndex = '99999';
+
+            const viewerElement = document.getElementById('viewer');
+
+            // Проверяем, если viewer существует, то уничтожаем его
+            if (viewer) {
+                viewer.destroy(); // Уничтожаем старый viewer
+                viewer = null; // Сбрасываем переменную
+            }
+
+            // Создаем новый объект Viewer
+            viewer = new Viewer({
+                container: viewerElement,
+                panorama: imageSrc, // Загружаем панораму
+            });
+
+            // Показываем кнопку закрытия после того, как панорама загружена
+            closeButton.style.display = 'block';
+
+            // Показываем панораму
+            viewerElement.style.display = 'block';
+
+            // Устанавливаем z-index для #viewer
+            viewerElement.style.zIndex = '1';
+
+            // Обработчик для кнопки закрытия
+            closeButton.onclick = function () {
+                    // Добавляем анимацию при закрытии
+                document.getElementById('close-btn').classList.add('closing');
+                setTimeout(() => {
+                    // Скрыть контейнер с панорамой
+                    document.getElementById('viewer').style.display = 'none';
+                    // Скрыть кнопку закрытия
+                    document.getElementById('close-btn').style.display = 'none';
+                }, 300); // Задержка для анимации
+                viewerElement.style.display = 'none';
+
+                // Убираем z-index, возвращаем его в исходное состояние (можно использовать 'auto' или просто убрать свойство)
+                viewerElement.style.zIndex = '';  // Убираем z-index
+
+                // Показываем остальные элементы
+                closeButton.style.display = 'none'; // Скрываем кнопку закрытия
+                planetButton.style.display = 'block'; // Показываем кнопку планеты
+                buttonContainer.style.display = 'block'; // Показываем кнопки фотоаппаратов
+                toggleButton.style.display = 'block';
+                menuToggle.style.display = 'block';
+            };
+        }
+                    window.addEventListener('resize', function () {
+                    const { count, positions, images } = backgrounds[currentBackground];
+                    addButtons(count, positions, images); // Перерисовываем кнопки при изменении размера
+
+                    // Убедитесь, что кнопка планеты снова кликабельна после изменения размера
+                    planetButton.style.zIndex = '1000'; 
+                });
+
+            
+
+                        // Изначальная отрисовка кнопок при загрузке страницы
+                        //addButtons(backgrounds[currentBackground].count, backgrounds[currentBackground].positions, backgrounds[currentBackground].images);
+
+                        planetButton.addEventListener('click', function() {
+                            // Получаем все кнопки с классом 'photo-button'
+                            const buttons = document.querySelectorAll('.photo-button');
+
+                            // Check if the buttons are visible (we assume the default visibility is block)
+                            const buttonsAreVisible = buttons.length > 0 && buttons[0].style.display !== 'none';
+
+                            if (buttonsAreVisible) {
+                                // Скрыть все кнопки
+                                buttons.forEach(button => {
+                                    button.style.display = 'none';
+                                });
+                            } else {
+                                // Добавить кнопки заново, если они скрыты
+                                addButtons(backgrounds[currentBackground].count, backgrounds[currentBackground].positions, backgrounds[currentBackground].images);
+                            }
+                        });
+    </script>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
@@ -469,6 +1542,8 @@
         backgroundImage.onload = function() {
             // Как только изображение загружено, рисуем его на канвасе
             ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+            currentBackground = backgrounds[currentBackgroundIndex]; // Присваиваем текущее изображение
+            console.log(currentBackground); 
         };
 
         // Массив с скинами (предполагается, что изображения находятся в одной папке)
@@ -700,6 +1775,14 @@
                 button.innerText = backgroundName;
 
                 button.addEventListener('click', () => {
+                    // Получаем все кнопки с классом 'photo-button'
+                    const buttons = document.querySelectorAll('.photo-button');
+                    // Скрываем все эти кнопки
+                    buttons.forEach(button => {
+                        button.style.display = 'none'; // Скрыть кнопку
+                    });
+
+
                     // Сразу меняем индекс текущего фона
                     currentBackgroundIndex = index;
                     // Создаем новый объект изображения и загружаем его
@@ -731,573 +1814,574 @@
         }
 
         function draw() {
-    // Рисуем фон
-    // Сначала рисуем фон (если нужно, фоновое изображение)
-        ctx.clearRect(backgroundImage, 0, 0, canvas.width, canvas.height);
-        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
-        redrawAllLines();
-   // Сначала рисуем следы без тени
-    ctx.shadowColor = 'transparent';  // Отключаем тень для следов
+            // Рисуем фон
+            // Сначала рисуем фон (если нужно, фоновое изображение)
+                ctx.clearRect(backgroundImage, 0, 0, canvas.width, canvas.height);
+                ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+                redrawAllLines();
+           // Сначала рисуем следы без тени
+            ctx.shadowColor = 'transparent';  // Отключаем тень для следов
 
-    pieces.forEach(piece => {
-        // Рисуем следы без тени
-        piece.trails.forEach(trail => {
-            ctx.beginPath();
-            ctx.arc(trail.x, trail.y, 5, 0, Math.PI * 2);
-            ctx.fillStyle = trail.color;
-            ctx.fill();
-            ctx.closePath();
-        });
-    });
-
-    // Затем рисуем фишки
-    pieces.forEach(piece => {
-        // Рисуем фишку с скином, если он есть
-        if (piece.skin) {
-            const skinImage = new Image();
-            skinImage.src = piece.skin;
-
-            const aspectRatio = 16 / 9; // 16:9 aspect ratio
-            const height = 65; // Установите желаемую высоту
-            const width = height * aspectRatio; // Рассчитываем ширину на основе высоты и соотношения сторон
-
-            ctx.drawImage(skinImage, piece.x - width / 2, piece.y - height / 2, width, height);
-
-            // Рисуем только текст с тенью
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.7)'; // Черная тень
-            ctx.shadowOffsetX = 2; // Смещение тени по оси X
-            ctx.shadowOffsetY = 2; // Смещение тени по оси Y
-            ctx.shadowBlur = 4; // Размытие тени
-
-            // Рисуем текст с тенью
-            ctx.fillStyle = piece.color === '#FFFF00' ? '#000000' : '#FFFFFF';
-            ctx.fillText(piece.name, piece.x, piece.y - height / 2 - 10); // Смещаем текст вверх
-        } else {
-            ctx.beginPath();
-            ctx.arc(piece.x, piece.y, 20, 0, Math.PI * 2);
-            ctx.fillStyle = piece.color;
-            ctx.fill();
-            ctx.closePath();
-
-            // Добавляем стиль текста
-            ctx.font = 'bold 26px "Trebuchet MS", Arial, sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-
-            // Рисуем только текст с тенью
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.7)'; // Черная тень
-            ctx.shadowOffsetX = 2; // Смещение тени по оси X
-            ctx.shadowOffsetY = 2; // Смещение тени по оси Y
-            ctx.shadowBlur = 4; // Размытие тени
-
-            // Рисуем текст с тенью
-            ctx.fillStyle = piece.color === '#FFFF00' ? '#000000' : '#FFFFFF';
-            ctx.fillText(piece.name, piece.x, piece.y - 10);
-
-            // Отключаем тень после использования
-            ctx.shadowColor = 'transparent';
-        }
-    });
-}
-
-        canvas.addEventListener('contextmenu', (event) => {
-            event.preventDefault();
-        });
-
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            draw();
-        });
-
-        window.addEventListener('keydown', (event) => {
-            if (event.ctrlKey && (event.code === 'KeyZ')) {
-                undoLastAction();
-            }
-        });
-
-        function undoLastAction() {
-            if (lastTrailAction.length > 0) {
-                const lastAction = lastTrailAction.pop();
-                const piece = lastAction.piece;
-                piece.trails = piece.trails.slice(100, piece.trails.length - lastAction.newTrails.length);
-            }
-            draw();
-        }
-
-
-function getCanvasCoordinates(e) {
-    const rect = canvas.getBoundingClientRect();
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-}
-
-// Обработчик для кнопки выбора цвета
-colorButton.addEventListener('click', () => {
-    colorInput.click();  // Программно кликаем по скрытому input, чтобы открыть панель выбора
-});
-
-// Обработчик для изменения цвета при выборе цвета в панели
-colorInput.addEventListener('input', (e) => {
-    lineColor = e.target.value;  // Обновляем цвет
-    colorButton.style.backgroundColor = lineColor;  // Обновляем фон кнопки
-    if (cursorEffect) {
-        cursorEffect.style.backgroundColor = newColor;
-    }
-});
-
-drawnLines.push({ 
-    tool: currentTool, 
-    startX, 
-    startY, 
-    endX, 
-    endY, 
-    lineThickness, 
-    lineColor 
-});
-
-
-function startDrawing(e) {
-    isDrawing = true;
-    const coords = getCanvasCoordinates(e);
-    startX = coords.x;
-    startY = coords.y;
-}
-
-function stopDrawing(e) {
-    if (!isDrawing) return;
-
-    const coords = getCanvasCoordinates(e);
-    endX = coords.x;
-    endY = coords.y;
-
-    if (currentTool === 'line') {
-        drawFixedLine();
-        drawnLines.push({ tool: 'line', startX, startY, endX, endY, lineThickness, lineColor });
-    } else if (currentTool === 'dashed') {
-        drawFixedDashedLine();
-        drawnLines.push({ tool: 'dashed', startX, startY, endX, endY, lineThickness, lineColor });
-    } else if (currentTool === 'arrow') {
-        drawFixedArrow();
-        drawnLines.push({ tool: 'arrow', startX, startY, endX, endY, lineThickness, lineColor });
-    }
-
-    isDrawing = false;
-    ctx.beginPath();
-}
-
-function isErasing(line, x, y, eraseSize) {
-    const dx = line.endX - line.startX;
-    const dy = line.endY - line.startY;
-    const length = Math.sqrt(dx * dx + dy * dy);
-
-    const t = ((x - line.startX) * dx + (y - line.startY) * dy) / (length * length);
-    const closestX = line.startX + t * dx;
-    const closestY = line.startY + t * dy;
-
-    const distance = Math.sqrt((x - closestX) ** 2 + (y - closestY) ** 2);
-    return distance <= eraseSize / 2;
-}
-
-function erase(e) {
-    if (!isDrawing) return;
-
-    const coords = getCanvasCoordinates(e);
-    const eraseSize = lineThickness * 5;
-
-    for (let i = drawnLines.length - 1; i >= 0; i--) {
-        const line = drawnLines[i];
-        if (isErasing(line, coords.x, coords.y, eraseSize)) {
-            drawnLines.splice(i, 1);
-        }
-    }
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    redrawAllLines();
-}
-
-function drawEraserIndicator(e) {
-    const coords = getCanvasCoordinates(e);
-    const eraseSize = lineThickness * 5;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    redrawAllLines();
-
-    ctx.beginPath();
-    ctx.arc(coords.x, coords.y, eraseSize / 2, 0, Math.PI * 2, false);
-    ctx.strokeStyle = '#00000033';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-}
-
-function drawTemporaryLine(event) {
-    const coords = getCanvasCoordinates(e);
-    endX = coords.x;
-    endY = coords.y;
-
-    redrawAllLines();
-    ctx.beginPath();
-    ctx.moveTo(startX, startY);
-    ctx.lineTo(endX, endY);
-    ctx.lineWidth = lineThickness;
-    ctx.strokeStyle = lineColor;
-    ctx.stroke();
-}
-
-function drawFixedLine() {
-    ctx.beginPath();
-    ctx.moveTo(startX, startY);
-    ctx.lineTo(endX, endY);
-    ctx.lineWidth = lineThickness;
-    ctx.strokeStyle = lineColor;
-    ctx.lineCap = 'round';
-    ctx.stroke();
-}
-
-function drawTemporaryDashedLine(e) {
-    const coords = getCanvasCoordinates(e);
-    endX = coords.x;
-    endY = coords.y;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    redrawAllLines();
-    ctx.beginPath();
-    ctx.moveTo(startX, startY);
-    ctx.setLineDash([lineThickness * 2, lineThickness * 2]);
-    ctx.lineTo(endX, endY);
-    ctx.lineWidth = lineThickness;
-    ctx.strokeStyle = lineColor;
-    ctx.stroke();
-    ctx.setLineDash([]);
-}
-
-function drawFixedDashedLine() {
-    ctx.beginPath();
-    ctx.moveTo(startX, startY);
-    ctx.setLineDash([lineThickness * 2, lineThickness * 2]);
-    ctx.lineTo(endX, endY);
-    ctx.lineWidth = lineThickness;
-    ctx.strokeStyle = lineColor;
-    ctx.lineCap = 'round';
-    ctx.stroke();
-    ctx.setLineDash([]);
-}
-
-function drawTemporaryArrow(e) {
-    const coords = getCanvasCoordinates(e);
-    endX = coords.x;
-    endY = coords.y;
-
-    // Очистка холста и перерисовка всех линий
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    redrawAllLines();
-
-    // Рисуем временную линию
-    ctx.beginPath();
-    ctx.moveTo(startX, startY);
-    ctx.lineTo(endX, endY);
-    ctx.lineWidth = lineThickness;
-    ctx.strokeStyle = lineColor;
-    ctx.lineCap = 'round';
-    ctx.stroke();
-
-    // Вычисление угла стрелки
-    const angle = Math.atan2(endY - startY, endX - startX);
-    const arrowLength = 15;  // Длина стрелки
-    const arrowAngle = Math.PI / 6;  // Угол стрелки
-
-    // Рисование временной стрелки
-    ctx.beginPath();
-    ctx.moveTo(endX, endY);
-    ctx.lineTo(
-        endX - arrowLength * Math.cos(angle - arrowAngle),
-        endY - arrowLength * Math.sin(angle - arrowAngle)
-    );
-    ctx.moveTo(endX, endY);
-    ctx.lineTo(
-        endX - arrowLength * Math.cos(angle + arrowAngle),
-        endY - arrowLength * Math.sin(angle + arrowAngle)
-    );
-    ctx.stroke();
-}
-
-function drawFixedArrow() {
-    ctx.beginPath();
-    ctx.moveTo(startX, startY);
-    ctx.lineTo(endX, endY);
-    ctx.lineWidth = lineThickness;
-    ctx.strokeStyle = lineColor;
-    ctx.lineCap = 'round';
-    ctx.stroke();
-
-    // Вычисление угла стрелки
-    const angle = Math.atan2(endY - startY, endX - startX);
-    const arrowLength = 15;  // Длина стрелки
-    const arrowAngle = Math.PI / 6;  // Угол стрелки
-
-    // Рисование конечной стрелки
-    ctx.beginPath();
-    ctx.moveTo(endX, endY);
-    ctx.lineTo(
-        endX - arrowLength * Math.cos(angle - arrowAngle),
-        endY - arrowLength * Math.sin(angle - arrowAngle)
-    );
-    ctx.moveTo(endX, endY);
-    ctx.lineTo(
-        endX - arrowLength * Math.cos(angle + arrowAngle),
-        endY - arrowLength * Math.sin(angle + arrowAngle)
-    );
-    ctx.stroke();
-}
-
-
-// Параметры анимации
-const hoverDuration = 300; // Продолжительность анимации увеличения в миллисекундах
-const fadeDuration = 500; // Продолжительность анимации уменьшения в миллисекундах
-
-// Функция для прорисовки всех линий
-function redrawAllLines() {
-    ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
-
-    drawnLines.forEach(line => {
-        ctx.beginPath();
-        ctx.moveTo(line.startX, line.startY);
-        ctx.lineTo(line.endX, line.endY);
-
-        // Проверка, наведена ли мышь на линию или её продолжение
-        const isNearLine = isMouseNearLine(line, mouseX, mouseY, 15); // Увеличим радиус активации
-        const isNearExtendedLine = isMouseNearExtendedLine(line, mouseX, mouseY, 15); // Проверка на продолжение линии
-
-        // Если мышь рядом с линией или её продолжением, начинаем анимацию увеличения
-        if (isNearLine || isNearExtendedLine) {
-            if (hoveredLine !== line) {
-                hoveredLine = line;
-                line.hoverProgress = 0; // Сброс прогресса увеличения для текущей линии
-                hoverDirection = 1; // Увеличиваем толщину
-            }
-
-            // Плавное увеличение толщины
-            line.hoverProgress = Math.min(line.hoverProgress + (1 / hoverDuration) * 16, 1); // 16 — это примерно 60 FPS
-        } else {
-            // Если мышь не рядом с линией, начинаем уменьшение толщины
-            if (hoveredLine === line) {
-                hoverDirection = -1; // Уменьшаем толщину
-            }
-
-            // Плавное уменьшение толщины
-            line.hoverProgress = Math.max(line.hoverProgress - (1 / fadeDuration) * 16, 0); // Плавно уменьшаем до 0
-        }
-
-        // Применяем эффект свечения и увеличиваем толщину
-        ctx.lineWidth = line.lineThickness * (1 + line.hoverProgress); // Увеличиваем толщину
-        ctx.shadowBlur = 15 * line.hoverProgress; // Увеличиваем эффект свечения
-        ctx.shadowColor = line.lineColor; // Цвет свечения такой же, как у линии
-
-        ctx.strokeStyle = line.lineColor;
-        ctx.stroke();
-        ctx.setLineDash([]); // Если были использованы пунктирные линии, сбрасываем
-
-        // Рисуем стрелку, если используется инструмент "стрелка"
-        if (line.tool === 'arrow') {
-            const angle = Math.atan2(line.endY - line.startY, line.endX - line.startX);
-            const arrowLength = 15;
-            const arrowAngle = Math.PI / 6;
-
-            ctx.beginPath();
-            ctx.moveTo(line.endX, line.endY);
-            ctx.lineTo(line.endX - arrowLength * Math.cos(angle - arrowAngle), line.endY - arrowLength * Math.sin(angle - arrowAngle));
-            ctx.moveTo(line.endX, line.endY);
-            ctx.lineTo(line.endX - arrowLength * Math.cos(angle + arrowAngle), line.endY - arrowLength * Math.sin(angle + arrowAngle));
-            ctx.stroke();
-        }
-    });
-}
-
-// Функция для проверки близости мыши к линии
-function isMouseNearLine(line, mouseX, mouseY, threshold = 15) {
-    // Вычисляем расстояние от точки (mouseX, mouseY) до линии
-    const distance = getDistanceFromPointToLine(line.startX, line.startY, line.endX, line.endY, mouseX, mouseY);
-    return distance <= threshold; // Возвращаем true, если расстояние меньше порога
-}
-
-// Функция для проверки близости мыши к продолжению линии
-function isMouseNearExtendedLine(line, mouseX, mouseY, threshold = 15) {
-    // Продолжаем линию в обе стороны (вперед и назад)
-    const extendedStartX = line.startX - (line.endX - line.startX);
-    const extendedStartY = line.startY - (line.endY - line.startY);
-    const extendedEndX = line.endX + (line.endX - line.startX);
-    const extendedEndY = line.endY + (line.endY - line.startY);
-
-    // Проверка расстояния до продолженной линии
-    const distance = getDistanceFromPointToLine(extendedStartX, extendedStartY, extendedEndX, extendedEndY, mouseX, mouseY);
-    return distance <= threshold; // Возвращаем true, если расстояние меньше порога
-}
-
-// Функция для вычисления перпендикулярного расстояния от точки до отрезка линии
-function getDistanceFromPointToLine(x1, y1, x2, y2, px, py) {
-    const A = px - x1;
-    const B = py - y1;
-    const C = x2 - x1;
-    const D = y2 - y1;
-
-    const dot = A * C + B * D;
-    const len_sq = C * C + D * D;
-    const param = len_sq !== 0 ? dot / len_sq : -1;
-
-    let closestX, closestY;
-    if (param < 0) {
-        closestX = x1;
-        closestY = y1;
-    } else if (param > 1) {
-        closestX = x2;
-        closestY = y2;
-    } else {
-        closestX = x1 + param * C;
-        closestY = y1 + param * D;
-    }
-
-    const dx = px - closestX;
-    const dy = py - closestY;
-    return Math.sqrt(dx * dx + dy * dy); // Возвращаем расстояние
-}
-
-
-
-document.getElementById('eraser').addEventListener('click', () => {
-    currentTool = 'eraser';
-});
-
-document.getElementById('line').addEventListener('click', () => {
-    currentTool = 'line';
-});
-
-document.getElementById('dashed').addEventListener('click', () => {
-    currentTool = 'dashed';
-});
-
-document.getElementById('arrow').addEventListener('click', () => {
-    currentTool = 'arrow';
-});
-
-document.getElementById('thickness').addEventListener('input', (e) => {
-    lineThickness = e.target.value;
-    document.getElementById('thicknessValue').innerText = lineThickness;
-});
-tools.classList.toggle('hidden'); 
-
-
-// Флаг для отслеживания состояния меню
-let isMenuOpen = false;
-
-// Обработчик для кнопки toggle
-toggleButton.addEventListener('click', () => {
-    // Переключаем класс hidden для панели инструментов
-    tools.classList.toggle('hidden');
-
-    // Обновляем флаг состояния меню
-    isMenuOpen = !tools.classList.contains('hidden');
-
-    // Изменяем текст на кнопке в зависимости от состояния
-    if (isMenuOpen) {
-        toggleButton.innerText = '—';
-    } else {
-        toggleButton.innerText = '+';
-    }
-});
-
-// Мышь нажатие (mousedown)
-canvas.addEventListener('mousedown', (e) => {
-    if (isMenuOpen) {
-        // Если меню открыто, можно рисовать
-        startDrawing(e);
-    } else {
-        // Если меню скрыто, можно двигать фишки
-        if (e.button === 0) { // Левая кнопка мыши
-            let foundPiece = null;
-            for (let i = pieces.length - 1; i >= 0; i--) { // Проверяем сверху вниз
-                if (isMouseOverPiece(e.offsetX, e.offsetY, pieces[i])) {
-                    foundPiece = pieces[i];
-                    break;
-                }
-            }
-            if (foundPiece) {
-                foundPiece.isDragging = true;
-            }
-        } else if (e.button === 2) {
-            isRightMouseDown = true;
-        }
-    }
-});
-
-// Мышь движение (mousemove)
-canvas.addEventListener('mousemove', (e) => {
-    mouseX = e.offsetX;
-    mouseY = e.offsetY;
-    if (isMenuOpen) {
-        // Если меню открыто, рисуем
-        if (isDrawing) {
-            if (currentTool === 'line') {
-                drawTemporaryLine(e);
-            } else if (currentTool === 'dashed') {
-                drawTemporaryDashedLine(e);
-            } else if (currentTool === 'arrow') {
-                drawTemporaryArrow(e);
-            } else if (currentTool === 'eraser') {
-                erase(e);
-            }
-        }
-    } else {
-        // Если меню скрыто, двигаем фишки
-        pieces.forEach(piece => {
-            if (piece.isDragging) {
-                const prevX = piece.x;
-                const prevY = piece.y;
-
-                piece.x = e.offsetX;
-                piece.y = e.offsetY;
-
-                if (isRightMouseDown) {
-                    const distance = Math.hypot(piece.x - prevX, piece.y - prevY);
-                    const steps = Math.ceil(distance); // Adjust trail smoothness
-
-                    for (let i = 1; i <= steps; i++) {
-                        const interpolatedX = prevX + (piece.x - prevX) * (i / steps);
-                        const interpolatedY = prevY + (piece.y - prevY) * (i / steps);
-                        piece.trails.push({ x: interpolatedX, y: interpolatedY, color: piece.color });
-                    }
-                    lastTrailAction.push({ piece, newTrails: [{ x: piece.x, y: piece.y, color: piece.color }] });
-                }
-            }
-        });
-    }
-    draw(); // Redraw the canvas after moving or drawing
-});
-
-// Мышь отпускание (mouseup)
-canvas.addEventListener('mouseup', (e) => {
-    if (e.button === 0) {
-        if (isMenuOpen) {
-            // Если меню открыто, рисуем
-            stopDrawing(e);
-        } else {
-            // Если меню скрыто, останавливаем движение фишек
             pieces.forEach(piece => {
-                piece.isDragging = false; // Stop dragging for all pieces on mouse up
+                // Рисуем следы без тени
+                piece.trails.forEach(trail => {
+                    ctx.beginPath();
+                    ctx.arc(trail.x, trail.y, 5, 0, Math.PI * 2);
+                    ctx.fillStyle = trail.color;
+                    ctx.fill();
+                    ctx.closePath();
+                });
+            });
+
+            // Затем рисуем фишки
+            pieces.forEach(piece => {
+                // Рисуем фишку с скином, если он есть
+                if (piece.skin) {
+                    const skinImage = new Image();
+                    skinImage.src = piece.skin;
+
+                    const aspectRatio = 16 / 9; // 16:9 aspect ratio
+                    const height = 65; // Установите желаемую высоту
+                    const width = height * aspectRatio; // Рассчитываем ширину на основе высоты и соотношения сторон
+
+                    ctx.drawImage(skinImage, piece.x - width / 2, piece.y - height / 2, width, height);
+
+                    // Рисуем только текст с тенью
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.7)'; // Черная тень
+                    ctx.shadowOffsetX = 2; // Смещение тени по оси X
+                    ctx.shadowOffsetY = 2; // Смещение тени по оси Y
+                    ctx.shadowBlur = 4; // Размытие тени
+
+                    // Рисуем текст с тенью
+                    ctx.fillStyle = piece.color === '#FFFF00' ? '#000000' : '#FFFFFF';
+                    ctx.fillText(piece.name, piece.x, piece.y - height / 2 - 10); // Смещаем текст вверх
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(piece.x, piece.y, 20, 0, Math.PI * 2);
+                    ctx.fillStyle = piece.color;
+                    ctx.fill();
+                    ctx.closePath();
+
+                    // Добавляем стиль текста
+                    ctx.font = 'bold 26px "Trebuchet MS", Arial, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+
+                    // Рисуем только текст с тенью
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.7)'; // Черная тень
+                    ctx.shadowOffsetX = 2; // Смещение тени по оси X
+                    ctx.shadowOffsetY = 2; // Смещение тени по оси Y
+                    ctx.shadowBlur = 4; // Размытие тени
+
+                    // Рисуем текст с тенью
+                    ctx.fillStyle = piece.color === '#FFFF00' ? '#000000' : '#FFFFFF';
+                    ctx.fillText(piece.name, piece.x, piece.y - 10);
+
+                    // Отключаем тень после использования
+                    ctx.shadowColor = 'transparent';
+                }
             });
         }
-    } else if (e.button === 2) {
-        isRightMouseDown = false;
-    }
-});
 
-// Мышь выход из области (mouseout)
-canvas.addEventListener('mouseout', stopDrawing);
+                canvas.addEventListener('contextmenu', (event) => {
+                    event.preventDefault();
+                });
 
-// Мышь выход за пределы (mouseleave)
-canvas.addEventListener('mouseleave', stopDrawing);  
+                window.addEventListener('resize', () => {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                    draw();
+                });
+
+                window.addEventListener('keydown', (event) => {
+                    if (event.ctrlKey && (event.code === 'KeyZ')) {
+                        undoLastAction();
+                    }
+                });
+
+                function undoLastAction() {
+                    if (lastTrailAction.length > 0) {
+                        const lastAction = lastTrailAction.pop();
+                        const piece = lastAction.piece;
+                        piece.trails = piece.trails.slice(100, piece.trails.length - lastAction.newTrails.length);
+                    }
+                    draw();
+                }
 
 
-        createBackgroundButtons();
-        draw();
+        function getCanvasCoordinates(e) {
+            const rect = canvas.getBoundingClientRect();
+            return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+        }
+
+        // Обработчик для кнопки выбора цвета
+        colorButton.addEventListener('click', () => {
+            colorInput.click();  // Программно кликаем по скрытому input, чтобы открыть панель выбора
+        });
+
+        // Обработчик для изменения цвета при выборе цвета в панели
+        colorInput.addEventListener('input', (e) => {
+            lineColor = e.target.value;  // Обновляем цвет
+            colorButton.style.backgroundColor = lineColor;  // Обновляем фон кнопки
+            if (cursorEffect) {
+                cursorEffect.style.backgroundColor = newColor;
+            }
+        });
+
+        drawnLines.push({ 
+            tool: currentTool, 
+            startX, 
+            startY, 
+            endX, 
+            endY, 
+            lineThickness, 
+            lineColor 
+        });
+
+
+        function startDrawing(e) {
+            isDrawing = true;
+            const coords = getCanvasCoordinates(e);
+            startX = coords.x;
+            startY = coords.y;
+        }
+
+        function stopDrawing(e) {
+            if (!isDrawing) return;
+
+            const coords = getCanvasCoordinates(e);
+            endX = coords.x;
+            endY = coords.y;
+
+            if (currentTool === 'line') {
+                drawFixedLine();
+                drawnLines.push({ tool: 'line', startX, startY, endX, endY, lineThickness, lineColor });
+            } else if (currentTool === 'dashed') {
+                drawFixedDashedLine();
+                drawnLines.push({ tool: 'dashed', startX, startY, endX, endY, lineThickness, lineColor });
+            } else if (currentTool === 'arrow') {
+                drawFixedArrow();
+                drawnLines.push({ tool: 'arrow', startX, startY, endX, endY, lineThickness, lineColor });
+            }
+
+            isDrawing = false;
+            ctx.beginPath();
+        }
+
+        function isErasing(line, x, y, eraseSize) {
+            const dx = line.endX - line.startX;
+            const dy = line.endY - line.startY;
+            const length = Math.sqrt(dx * dx + dy * dy);
+
+            const t = ((x - line.startX) * dx + (y - line.startY) * dy) / (length * length);
+            const closestX = line.startX + t * dx;
+            const closestY = line.startY + t * dy;
+
+            const distance = Math.sqrt((x - closestX) ** 2 + (y - closestY) ** 2);
+            return distance <= eraseSize / 2;
+        }
+
+        function erase(e) {
+            if (!isDrawing) return;
+
+            const coords = getCanvasCoordinates(e);
+            const eraseSize = lineThickness * 5;
+
+            for (let i = drawnLines.length - 1; i >= 0; i--) {
+                const line = drawnLines[i];
+                if (isErasing(line, coords.x, coords.y, eraseSize)) {
+                    drawnLines.splice(i, 1);
+                }
+            }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            redrawAllLines();
+        }
+
+        function drawEraserIndicator(e) {
+            const coords = getCanvasCoordinates(e);
+            const eraseSize = lineThickness * 5;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            redrawAllLines();
+
+            ctx.beginPath();
+            ctx.arc(coords.x, coords.y, eraseSize / 2, 0, Math.PI * 2, false);
+            ctx.strokeStyle = '#00000033';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+
+        function drawTemporaryLine(event) {
+            const coords = getCanvasCoordinates(e);
+            endX = coords.x;
+            endY = coords.y;
+
+            redrawAllLines();
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(endX, endY);
+            ctx.lineWidth = lineThickness;
+            ctx.strokeStyle = lineColor;
+            ctx.stroke();
+        }
+
+        function drawFixedLine() {
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(endX, endY);
+            ctx.lineWidth = lineThickness;
+            ctx.strokeStyle = lineColor;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+        }
+
+        function drawTemporaryDashedLine(e) {
+            const coords = getCanvasCoordinates(e);
+            endX = coords.x;
+            endY = coords.y;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            redrawAllLines();
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.setLineDash([lineThickness * 2, lineThickness * 2]);
+            ctx.lineTo(endX, endY);
+            ctx.lineWidth = lineThickness;
+            ctx.strokeStyle = lineColor;
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function drawFixedDashedLine() {
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.setLineDash([lineThickness * 2, lineThickness * 2]);
+            ctx.lineTo(endX, endY);
+            ctx.lineWidth = lineThickness;
+            ctx.strokeStyle = lineColor;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        function drawTemporaryArrow(e) {
+            const coords = getCanvasCoordinates(e);
+            endX = coords.x;
+            endY = coords.y;
+
+            // Очистка холста и перерисовка всех линий
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            redrawAllLines();
+
+            // Рисуем временную линию
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(endX, endY);
+            ctx.lineWidth = lineThickness;
+            ctx.strokeStyle = lineColor;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+
+            // Вычисление угла стрелки
+            const angle = Math.atan2(endY - startY, endX - startX);
+            const arrowLength = 15;  // Длина стрелки
+            const arrowAngle = Math.PI / 6;  // Угол стрелки
+
+            // Рисование временной стрелки
+            ctx.beginPath();
+            ctx.moveTo(endX, endY);
+            ctx.lineTo(
+                endX - arrowLength * Math.cos(angle - arrowAngle),
+                endY - arrowLength * Math.sin(angle - arrowAngle)
+            );
+            ctx.moveTo(endX, endY);
+            ctx.lineTo(
+                endX - arrowLength * Math.cos(angle + arrowAngle),
+                endY - arrowLength * Math.sin(angle + arrowAngle)
+            );
+            ctx.stroke();
+        }
+
+        function drawFixedArrow() {
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(endX, endY);
+            ctx.lineWidth = lineThickness;
+            ctx.strokeStyle = lineColor;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+
+            // Вычисление угла стрелки
+            const angle = Math.atan2(endY - startY, endX - startX);
+            const arrowLength = 15;  // Длина стрелки
+            const arrowAngle = Math.PI / 6;  // Угол стрелки
+
+            // Рисование конечной стрелки
+            ctx.beginPath();
+            ctx.moveTo(endX, endY);
+            ctx.lineTo(
+                endX - arrowLength * Math.cos(angle - arrowAngle),
+                endY - arrowLength * Math.sin(angle - arrowAngle)
+            );
+            ctx.moveTo(endX, endY);
+            ctx.lineTo(
+                endX - arrowLength * Math.cos(angle + arrowAngle),
+                endY - arrowLength * Math.sin(angle + arrowAngle)
+            );
+            ctx.stroke();
+        }
+
+
+        // Параметры анимации
+        const hoverDuration = 300; // Продолжительность анимации увеличения в миллисекундах
+        const fadeDuration = 500; // Продолжительность анимации уменьшения в миллисекундах
+
+        // Функция для прорисовки всех линий
+        function redrawAllLines() {
+            ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+
+            drawnLines.forEach(line => {
+                ctx.beginPath();
+                ctx.moveTo(line.startX, line.startY);
+                ctx.lineTo(line.endX, line.endY);
+
+                // Проверка, наведена ли мышь на линию или её продолжение
+                const isNearLine = isMouseNearLine(line, mouseX, mouseY, 15); // Увеличим радиус активации
+                const isNearExtendedLine = isMouseNearExtendedLine(line, mouseX, mouseY, 15); // Проверка на продолжение линии
+
+                // Если мышь рядом с линией или её продолжением, начинаем анимацию увеличения
+                if (isNearLine || isNearExtendedLine) {
+                    if (hoveredLine !== line) {
+                        hoveredLine = line;
+                        line.hoverProgress = 0; // Сброс прогресса увеличения для текущей линии
+                        hoverDirection = 1; // Увеличиваем толщину
+                    }
+
+                    // Плавное увеличение толщины
+                    line.hoverProgress = Math.min(line.hoverProgress + (1 / hoverDuration) * 16, 1); // 16 — это примерно 60 FPS
+                } else {
+                    // Если мышь не рядом с линией, начинаем уменьшение толщины
+                    if (hoveredLine === line) {
+                        hoverDirection = -1; // Уменьшаем толщину
+                    }
+
+                    // Плавное уменьшение толщины
+                    line.hoverProgress = Math.max(line.hoverProgress - (1 / fadeDuration) * 16, 0); // Плавно уменьшаем до 0
+                }
+
+                // Применяем эффект свечения и увеличиваем толщину
+                ctx.lineWidth = line.lineThickness * (1 + line.hoverProgress); // Увеличиваем толщину
+                ctx.shadowBlur = 15 * line.hoverProgress; // Увеличиваем эффект свечения
+                ctx.shadowColor = line.lineColor; // Цвет свечения такой же, как у линии
+
+                ctx.strokeStyle = line.lineColor;
+                ctx.stroke();
+                ctx.setLineDash([]); // Если были использованы пунктирные линии, сбрасываем
+
+                // Рисуем стрелку, если используется инструмент "стрелка"
+                if (line.tool === 'arrow') {
+                    const angle = Math.atan2(line.endY - line.startY, line.endX - line.startX);
+                    const arrowLength = 15;
+                    const arrowAngle = Math.PI / 6;
+
+                    ctx.beginPath();
+                    ctx.moveTo(line.endX, line.endY);
+                    ctx.lineTo(line.endX - arrowLength * Math.cos(angle - arrowAngle), line.endY - arrowLength * Math.sin(angle - arrowAngle));
+                    ctx.moveTo(line.endX, line.endY);
+                    ctx.lineTo(line.endX - arrowLength * Math.cos(angle + arrowAngle), line.endY - arrowLength * Math.sin(angle + arrowAngle));
+                    ctx.stroke();
+                }
+            });
+        }
+
+        // Функция для проверки близости мыши к линии
+        function isMouseNearLine(line, mouseX, mouseY, threshold = 15) {
+            // Вычисляем расстояние от точки (mouseX, mouseY) до линии
+            const distance = getDistanceFromPointToLine(line.startX, line.startY, line.endX, line.endY, mouseX, mouseY);
+            return distance <= threshold; // Возвращаем true, если расстояние меньше порога
+        }
+
+        // Функция для проверки близости мыши к продолжению линии
+        function isMouseNearExtendedLine(line, mouseX, mouseY, threshold = 15) {
+            // Продолжаем линию в обе стороны (вперед и назад)
+            const extendedStartX = line.startX - (line.endX - line.startX);
+            const extendedStartY = line.startY - (line.endY - line.startY);
+            const extendedEndX = line.endX + (line.endX - line.startX);
+            const extendedEndY = line.endY + (line.endY - line.startY);
+
+            // Проверка расстояния до продолженной линии
+            const distance = getDistanceFromPointToLine(extendedStartX, extendedStartY, extendedEndX, extendedEndY, mouseX, mouseY);
+            return distance <= threshold; // Возвращаем true, если расстояние меньше порога
+        }
+
+        // Функция для вычисления перпендикулярного расстояния от точки до отрезка линии
+        function getDistanceFromPointToLine(x1, y1, x2, y2, px, py) {
+            const A = px - x1;
+            const B = py - y1;
+            const C = x2 - x1;
+            const D = y2 - y1;
+
+            const dot = A * C + B * D;
+            const len_sq = C * C + D * D;
+            const param = len_sq !== 0 ? dot / len_sq : -1;
+
+            let closestX, closestY;
+            if (param < 0) {
+                closestX = x1;
+                closestY = y1;
+            } else if (param > 1) {
+                closestX = x2;
+                closestY = y2;
+            } else {
+                closestX = x1 + param * C;
+                closestY = y1 + param * D;
+            }
+
+            const dx = px - closestX;
+            const dy = py - closestY;
+            return Math.sqrt(dx * dx + dy * dy); // Возвращаем расстояние
+        }
+
+
+
+        document.getElementById('eraser').addEventListener('click', () => {
+            currentTool = 'eraser';
+        });
+
+        document.getElementById('line').addEventListener('click', () => {
+            currentTool = 'line';
+        });
+
+        document.getElementById('dashed').addEventListener('click', () => {
+            currentTool = 'dashed';
+        });
+
+        document.getElementById('arrow').addEventListener('click', () => {
+            currentTool = 'arrow';
+        });
+
+        document.getElementById('thickness').addEventListener('input', (e) => {
+            lineThickness = e.target.value;
+            document.getElementById('thicknessValue').innerText = lineThickness;
+        });
+        tools.classList.toggle('hidden'); 
+
+
+        // Флаг для отслеживания состояния меню
+        let isMenuOpen = false;
+
+        // Обработчик для кнопки toggle
+        toggleButton.addEventListener('click', () => {
+            // Переключаем класс hidden для панели инструментов
+            tools.classList.toggle('hidden');
+
+            // Обновляем флаг состояния меню
+            isMenuOpen = !tools.classList.contains('hidden');
+
+            // Изменяем текст на кнопке в зависимости от состояния
+            if (isMenuOpen) {
+                toggleButton.innerText = '—';
+            } else {
+                toggleButton.innerText = '+';
+            }
+        });
+
+        // Мышь нажатие (mousedown)
+        canvas.addEventListener('mousedown', (e) => {
+            if (isMenuOpen) {
+                // Если меню открыто, можно рисовать
+                startDrawing(e);
+            } else {
+                // Если меню скрыто, можно двигать фишки
+                if (e.button === 0) { // Левая кнопка мыши
+                    let foundPiece = null;
+                    for (let i = pieces.length - 1; i >= 0; i--) { // Проверяем сверху вниз
+                        if (isMouseOverPiece(e.offsetX, e.offsetY, pieces[i])) {
+                            foundPiece = pieces[i];
+                            break;
+                        }
+                    }
+                    if (foundPiece) {
+                        foundPiece.isDragging = true;
+                    }
+                } else if (e.button === 2) {
+                    isRightMouseDown = true;
+                }
+            }
+        });
+
+        // Мышь движение (mousemove)
+        canvas.addEventListener('mousemove', (e) => {
+            mouseX = e.offsetX;
+            mouseY = e.offsetY;
+            if (isMenuOpen) {
+                // Если меню открыто, рисуем
+                if (isDrawing) {
+                    if (currentTool === 'line') {
+                        drawTemporaryLine(e);
+                    } else if (currentTool === 'dashed') {
+                        drawTemporaryDashedLine(e);
+                    } else if (currentTool === 'arrow') {
+                        drawTemporaryArrow(e);
+                    } else if (currentTool === 'eraser') {
+                        erase(e);
+                    }
+                }
+            } else {
+                // Если меню скрыто, двигаем фишки
+                pieces.forEach(piece => {
+                    if (piece.isDragging) {
+                        const prevX = piece.x;
+                        const prevY = piece.y;
+
+                        piece.x = e.offsetX;
+                        piece.y = e.offsetY;
+
+                        if (isRightMouseDown) {
+                            const distance = Math.hypot(piece.x - prevX, piece.y - prevY);
+                            const steps = Math.ceil(distance); // Adjust trail smoothness
+
+                            for (let i = 1; i <= steps; i++) {
+                                const interpolatedX = prevX + (piece.x - prevX) * (i / steps);
+                                const interpolatedY = prevY + (piece.y - prevY) * (i / steps);
+                                piece.trails.push({ x: interpolatedX, y: interpolatedY, color: piece.color });
+                            }
+                            lastTrailAction.push({ piece, newTrails: [{ x: piece.x, y: piece.y, color: piece.color }] });
+                        }
+                    }
+                });
+            }
+            draw(); // Redraw the canvas after moving or drawing
+        });
+
+        // Мышь отпускание (mouseup)
+        canvas.addEventListener('mouseup', (e) => {
+            if (e.button === 0) {
+                if (isMenuOpen) {
+                    // Если меню открыто, рисуем
+                    stopDrawing(e);
+                } else {
+                    // Если меню скрыто, останавливаем движение фишек
+                    pieces.forEach(piece => {
+                        piece.isDragging = false; // Stop dragging for all pieces on mouse up
+                    });
+                }
+            } else if (e.button === 2) {
+                isRightMouseDown = false;
+            }
+        });
+
+        // Мышь выход из области (mouseout)
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        // Мышь выход за пределы (mouseleave)
+        canvas.addEventListener('mouseleave', stopDrawing);  
+
+
+                createBackgroundButtons();
+                draw();          
     </script>
+
 </body>
 </html>
